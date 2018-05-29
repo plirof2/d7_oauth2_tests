@@ -355,7 +355,7 @@ function oauth2_authentication_login_block($form) {
     //$client = new $class($name, $password);
 
   //$form['#action'] = url('cas', array('query' => drupal_get_destination()));
-  $form['#action'] = url('cas11', array('query' => drupal_get_destination()));// Call A ROUTE that CALLS taxis
+  $form['#action'] = url('oauth2/authorized', array('query' => drupal_get_destination()));// Call A ROUTE that CALLS taxis
   $form['#id'] = 'oauth2_authentication-login-form';
 
   $form['oauth2_authentication_login_redirection_message'] = array(
