@@ -21,6 +21,17 @@ function oauth2_authentication_menu() {
     'access arguments' => array('administer oauth2 authentication'),
     'file' => 'includes/oauth2_authentication.admin.inc',
   );
+
+  $items['oauth2connect'] = array(
+    'path' => 'oauth2cas',
+    'title' => 'CAS Login',
+    'page callback' => 'oauth2cas_login_page',
+    'access callback' => 'user_is_anonymous',
+    'type' => MENU_SUGGESTED_ITEM,
+  );
+
+
+
   return $items;
 }
 
@@ -299,9 +310,9 @@ function oauth2_authentication_authenticate($name, $password) {
       // Instantiate an OAuth2 Authentication class with the credentials.
       $class = variable_get('oauth2_authentication_class', 'OAuth2AuthenticationClient');
       $client = new $class($name, $password);
-
+      
       // Check if the user exists remotely.
-      if ($client->userExistsRemotely()) {
+      if ($client->getTokenServerSide()) {
 
         // We're dealing with a valid remote user so create it locally.
         $uid = $client->createUserLocally()->uid;
@@ -355,22 +366,139 @@ function oauth2_authentication_login_block($form) {
     //$client = new $class($name, $password);
 
   //$form['#action'] = url('cas', array('query' => drupal_get_destination()));
-  $form['#action'] = url('oauth2/authorized', array('query' => drupal_get_destination()));// Call A ROUTE that CALLS taxis
+  //$form['#action'] = url('oauth2/authorized', array('query' => drupal_get_destination()));// Call A ROUTE that CALLS taxis
+$arr01=array();
+	 $arr01["hello"]="hi";
+	$form['#action'] = url('oauth2cas', $arr01);// Call A ROUTE that CALLS taxis
   $form['#id'] = 'oauth2_authentication-login-form';
 
   $form['oauth2_authentication_login_redirection_message'] = array(
     '#type' => 'item',
-    '#markup' => t(variable_get('oauth2_authentication_login_redir_message', oauth2_authentication_LOGIN_REDIR_MESSAGE)),
+    '#markup' => t(variable_get('oauth2_authentication_login_redir_message', "oauth2_authentication_LOGIN_REDIR_MESSAGE")),
     '#weight' => -1,
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t(variable_get('oauth2_authentication_login_invite', oauth2_authentication_LOGIN_INVITE_DEFAULT)),
+    '#value' => t(variable_get('oauth2_authentication_login_invite', "oauth2_authentication_LOGIN_INVITE_DEFAULT")),
   );
 
   return $form;
 }
 
+
+
+/**
+ * Implements hook_init().
+ *
+ * Traps a page load to see if authentication is required.
+ */
+/*
+function oauth2_authentication_init() {
+  global $user;
+
+  // Process a single-sign out request.
+  //_cas_single_sign_out_check();
+
+  // If a user is not logged in, consider using CAS authentication.
+  if (!$user->uid) {
+    $force_authentication = _oauth2cas_force_login();
+    //$check_authentication = _cas_allow_check_for_login();
+    $request_type = $_SERVER['REQUEST_METHOD'];
+    $perform_login_check = $force_authentication || ($check_authentication && ($request_type == 'GET'));
+    if ($perform_login_check) {
+      //cas_login_check($force_authentication);
+    }
+  }
+}
+*/
+
+/**
+ * Determine if we should require the user be authenticated.
+ *
+ * @return
+ *   TRUE if we should require the user be authenticated, FALSE otherwise.
+ */
+function oauth2cas_login_page() {
+  // The 'cas' page is a shortcut to force authentication.
+  if (strtolower(arg(0)) == 'oauth2cas') {
+  //  return TRUE;
+  }
+drupal_set_message("oauth2cas_login_page");
+    $class = variable_get('oauth2_authentication_class', 'OAuth2AuthenticationClient');
+    $client = new $class("aaa", "bbb");
+
+  // Set the default behavior.
+  $force_login = $client->getAccessToken();         // Get a remote access token if possible.  If it's not possible, the
+        // user can still log in, but he/she won't be able to access remote
+        // resources.
+       
+
+  // If we match the specified paths, reverse the behavior.
+  if ($pages = variable_get('cas_pages', '')) {
+    $path = drupal_get_path_alias($_GET['q']);
+    if (drupal_match_path($path, $pages)) {
+      $force_login = !$force_login;
+    }
+  }
+
+  return $force_login;
+}
+
+
+
+/**
+ * Determine if we should require the user be authenticated.
+ *
+ * @return
+ *   TRUE if we should require the user be authenticated, FALSE otherwise.
+ */
+function _oauth2cas_force_login() {
+  // The 'cas' page is a shortcut to force authentication.
+  if (strtolower(arg(0)) == 'oauth2cas') {
+    return TRUE;
+  }
+
+  // Do not process in maintenance mode.
+  if (variable_get('maintenance_mode', 0)) {
+    return FALSE;
+  }
+
+  // Do not force login for XMLRPC, Cron, or Drush.
+  if (stristr($_SERVER['SCRIPT_FILENAME'], 'xmlrpc.php')) {
+    return FALSE;
+  }
+  if (stristr($_SERVER['SCRIPT_FILENAME'], 'cron.php')) {
+    return FALSE;
+  }
+  if (function_exists('drush_verify_cli') && drush_verify_cli()) {
+    return FALSE;
+  }
+/*
+  // Excluded page do not need login.
+  if ($pages = variable_get('cas_exclude', CAS_EXCLUDE)) {
+    $path = drupal_get_path_alias($_GET['q']);
+    if (drupal_match_path($path, $pages)) {
+      return FALSE;
+    }
+  }
+*/
+
+    $class = variable_get('oauth2_authentication_class', 'OAuth2AuthenticationClient');
+    $client = new $class("aaa", "bbb");
+
+  // Set the default behavior.
+  $force_login = variable_get('cas_access', 0);
+
+  // If we match the specified paths, reverse the behavior.
+  if ($pages = variable_get('cas_pages', '')) {
+    $path = drupal_get_path_alias($_GET['q']);
+    if (drupal_match_path($path, $pages)) {
+      $force_login = !$force_login;
+    }
+  }
+
+  return $force_login;
+}
 
 //------------------------------------ CASModifications ------------------------------------
