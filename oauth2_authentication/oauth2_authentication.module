@@ -313,12 +313,13 @@ function oauth2_authentication_authenticate($name, $password) {
   return $uid;
 }
 
+//+++++++++++++++++++++++++ block CASModifications ++++++++++++++++++++++++++++++++++++++++
 
 /**
  * Implements hook_block_info().
  */
 function oauth2_authentication_block_info() {
-  $blocks['login']['info'] = t('oauth2_authentication login');
+  $blocks['login']['info'] = t('oauth2_authentication login (block name)');
   // Not worth caching.
   $blocks['login']['cache'] = DRUPAL_NO_CACHE;
 
@@ -364,3 +365,6 @@ function oauth2_authentication_login_block($form) {
 
   return $form;
 }
+
+
+//------------------------------------ CASModifications ------------------------------------
