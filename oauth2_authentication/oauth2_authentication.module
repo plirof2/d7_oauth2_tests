@@ -193,6 +193,7 @@ function oauth2_authentication_user_logout($account) {
  * user_login_authenticate_validate().  The last stanza is the only thing we'd
  * like to change as that's the function call we actually care about.
  */
+/*
 function oauth2_authentication_login_authenticate_validate($form, &$form_state) {
   $password = trim($form_state['values']['pass']);
   if (!empty($form_state['values']['name']) && !empty($password)) {
@@ -233,7 +234,7 @@ function oauth2_authentication_login_authenticate_validate($form, &$form_state) 
     $form_state['uid'] = oauth2_authentication_authenticate($form_state['values']['name'], $password);
   }
 }
-
+*/
 /**
  * Replacement for user_authenticate().
  *
@@ -312,3 +313,54 @@ function oauth2_authentication_authenticate($name, $password) {
   return $uid;
 }
 
+
+/**
+ * Implements hook_block_info().
+ */
+function oauth2_authentication_block_info() {
+  $blocks['login']['info'] = t('oauth2_authentication login');
+  // Not worth caching.
+  $blocks['login']['cache'] = DRUPAL_NO_CACHE;
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function oauth2_authentication_block_view($delta = '') {
+  global $user;
+
+  $block = array();
+
+  switch ($delta) {
+    case 'login':
+      // For usability's sake, avoid showing two login forms on one page.
+      if (!$user->uid && !(arg(0) == 'user' && !is_numeric(arg(1)))) {
+        $block['subject'] = t('User login');
+        $block['content'] = drupal_get_form('oauth2_authentication_login_block');
+      }
+      return $block;
+  }
+}
+
+/**
+ * Login form for the CAS login block.
+ */
+function oauth2_authentication_login_block($form) {
+  $form['#action'] = url('cas', array('query' => drupal_get_destination()));
+  $form['#id'] = 'oauth2_authentication-login-form';
+
+  $form['oauth2_authentication_login_redirection_message'] = array(
+    '#type' => 'item',
+    '#markup' => t(variable_get('oauth2_authentication_login_redir_message', oauth2_authentication_LOGIN_REDIR_MESSAGE)),
+    '#weight' => -1,
+  );
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t(variable_get('oauth2_authentication_login_invite', oauth2_authentication_LOGIN_INVITE_DEFAULT)),
+  );
+
+  return $form;
+}
