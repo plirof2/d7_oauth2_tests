@@ -83,14 +83,19 @@ function oauth2_authentication_form_user_login_alter(&$form, &$form_state, $form
 
   // Replace the user_login_authenticate_validate() call with our own
   // oauth2_authentication_login_authenticate_validate() function.
+  if ($form_id == 'user_login_block' || $form_id == 'user_login') {
+    drupal_set_message("AAAAA oauth2_authentication_form_user_login_alter");
+    // …
+  }
+drupal_set_message( "FORM LOGIN helloooo oauth2_authentication_form_user_login_alter");
+//$my_url='http://localhost:8282/o/oauth2/v2/auth?client_id=dummy-client-id&redirect_uri=http://localhost/drupal84/gsis&response_type=code&scope=read&state=_gsis_20924727255b0d0195aa34b ';
 
-
-  /*
+  
   if (in_array('user_login_authenticate_validate', $form['#validate'])) {
     $key = array_search('user_login_authenticate_validate', $form['#validate']);
     $form['#validate'][$key] = 'oauth2_authentication_login_authenticate_validate';
   }
-  */
+  
 }
 
 /**
@@ -98,12 +103,14 @@ function oauth2_authentication_form_user_login_alter(&$form, &$form_state, $form
  */
 function oauth2_authentication_form_user_login_block_alter(&$form, &$form_state, $form_id) {
   global $user;
-/*
+  drupal_set_message( "LOGIN BLOCK helloooo  oauth2_authentication_form_user_login_block_alter");
+
   // Make the same changes as we're making to the standard login form.  See
   // oauth2_authentication_form_user_login_alter() for details.
   oauth2_authentication_form_user_login_alter($form, $form_state, $form_id);
 
   // Disable password-reset links if applicable.
+  /* This produces ERROR
   if ((!variable_get('oauth2_authentication_user_edit_password', FALSE)) &&
       ($user->uid != 1)) {
     $form['links'] = '';
@@ -124,7 +131,8 @@ function oauth2_authentication_form_user_login_block_alter(&$form, &$form_state,
  */
 function oauth2_authentication_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
   global $user;
-
+  drupal_set_message( "PROFILE FORM ALTER helloooo  oauth2_authentication_form_user_profile_form_alte");
+/*
   // We want to keep user fields editable for user administrators so exit if the
   // current user is one of them.
   if (($user->uid == 1) || user_access('administer users')) {
@@ -155,6 +163,8 @@ function oauth2_authentication_form_user_profile_form_alter(&$form, &$form_state
   if ($disable_password_current) {
     $form['account']['current_pass']['#disabled'] = TRUE;
   }
+
+  */
 }
 
 /**
@@ -284,7 +294,7 @@ function oauth2_authentication_authenticate($name, $password) {
     }
 
     else /* there is no local user account */ {
-
+      drupal_set_message("ZZZZz oauth2_authentication_authenticate NO LOCAL USER");
       // Instantiate an OAuth2 Authentication class with the credentials.
       $class = variable_get('oauth2_authentication_class', 'OAuth2AuthenticationClient');
       $client = new $class($name, $password);
