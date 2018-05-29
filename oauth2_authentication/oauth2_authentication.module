@@ -349,7 +349,13 @@ function oauth2_authentication_block_view($delta = '') {
  * Login form for the CAS login block.
  */
 function oauth2_authentication_login_block($form) {
-  $form['#action'] = url('cas', array('query' => drupal_get_destination()));
+
+    // Instantiate an OAuth2 Authentication class with the credentials.
+    //$class = variable_get('oauth2_authentication_class', 'OAuth2AuthenticationClient');
+    //$client = new $class($name, $password);
+
+  //$form['#action'] = url('cas', array('query' => drupal_get_destination()));
+  $form['#action'] = url('cas11', array('query' => drupal_get_destination()));// Call A ROUTE that CALLS taxis
   $form['#id'] = 'oauth2_authentication-login-form';
 
   $form['oauth2_authentication_login_redirection_message'] = array(
