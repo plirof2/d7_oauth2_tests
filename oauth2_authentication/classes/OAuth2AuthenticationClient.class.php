@@ -61,7 +61,7 @@ class OAuth2AuthenticationClient {
    *   TRUE if an access token was retrieved; FALSE otherwise.
    */
   public function getAccessToken() {
-
+      echo "<h1OAuth2AuthClientClass Inside public function getAccessToken() ,token=$token INSIDE 7 getToken() </h1>  ";
     // Configure the OAuth2 client.
     $oauth2_config = array(
       'token_endpoint' => 'http://localhost:8282/oauth2/v4/token',// variable_get('oauth2_authentication_token_endpoint', ''),
@@ -90,8 +90,11 @@ class OAuth2AuthenticationClient {
       // Create an OAuth2 client and attempt to get an access token.  If we
       // aren't able to, we'll end up in the catch stanza as an exception will
       // be thrown.
+      echo "<h1OAuth2AuthClientClass Inside public function getAccessToken() ,token=$token INSIDE 8 getToken() </h1>";
       $oauth2_client = new OAuth2\Client($oauth2_config);
+
       $token = $oauth2_client->getAccessToken();
+
       $token_retrieved = isset($token);
     }
     catch (Exception $e) {

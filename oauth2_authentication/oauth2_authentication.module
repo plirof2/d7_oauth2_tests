@@ -417,15 +417,17 @@ drupal_set_message("oauth2cas_login_page");
         // user can still log in, but he/she won't be able to access remote
         // resources.
 
-  drupal_set_message("oauth2cas_login_page  force_login=".$force_login);       
+  drupal_set_message("FFFoauth2cas_login_page  force_login=".$force_login);       
 
   // If we match the specified paths, reverse the behavior.
+  /*
   if ($pages = variable_get('cas_pages', '')) {
     $path = drupal_get_path_alias($_GET['q']);
     if (drupal_match_path($path, $pages)) {
       $force_login = !$force_login;
     }
   }
+  */
 drupal_set_message("oauth2cas_login_page BEFORE return");
   return $force_login;
 }
@@ -509,8 +511,12 @@ var_dump($_REQUEST);
 
 if(!is_null($code=$_REQUEST['code']) && !is_null($state=$_REQUEST['state'])) {
   echo "<h1> code=$code <BR> state=$state</h1>";
+      $class = variable_get('oauth2_authentication_class', 'OAuth2AuthenticationClient');
+      $client = new $class("aaa", "bbb");
 
-
+  // Set the default behavior.
+      $force_login = $client->getAccessToken(); 
+echo "<h1>force_login= $force_login</h1>";
 }
 
 return array('#markup'=>arg(0).arg(1).'The quick brown fox says hello, and the lazy dogs thanks you for following conventions.');

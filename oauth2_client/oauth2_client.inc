@@ -222,7 +222,9 @@ class Client {
 
         case 'server-side':
           if ($redirect) {
+            echo "<h1>oauth2_client SERVER SIDE auth ,token=$token BEFORE getTokenServerSide()</h1>";
             $token = $this->getTokenServerSide();
+            echo "<h1>oauth2_client SERVER SIDE auth ,token=$token AFTER getTokenServerSide()</h1>";
           }
           else {
             $this->clearToken();
@@ -336,13 +338,15 @@ class Client {
     ) {
       throw new \Exception(t("Wrong query parameter 'state'."));
     }
-
+    echo "<h1>oauth2_client SERVER SIDE auth ,token=$token INSIDE 1 getTokenServerSide()</h1>";
     // Get and return a token.
-    return $this->getToken(array(
+    $tokenServerSide=$this->getToken(array(
         'grant_type' => 'authorization_code',
         'code' => $_GET['code'],
         'redirect_uri' => $this->params['redirect_uri'],
       ));
+    echo "<h1>oauth2_client SERVER SIDE auth ,tokenServerSide=$tokenServerSide INSIDE 2 getTokenServerSide()</h1>";
+    return $tokenServerSide;
   }
 
   /**
@@ -427,7 +431,8 @@ class Client {
     if (array_key_exists('scope', $data) && is_null($data['scope'])) {
       unset($data['scope']);
     }
-
+echo "<h1>oauth2_client Inside getToken auth ,token=$token INSIDE 3 getToken() data=$data</h1>";
+var_dump($data);
     $client_id = $this->params['client_id'];
     $client_secret = $this->params['client_secret'];
     $token_endpoint = $this->params['token_endpoint'];
@@ -440,6 +445,8 @@ class Client {
         'Authorization' => 'Basic ' . base64_encode("$client_id:$client_secret"),
       ),
     );
+echo "<h1>oauth2_client Inside getToken auth ,token=$token INSIDE 4 getToken() </h1>";
+var_dump($options);
     if ($this->params['skip-ssl-verification']) {
       $options['context'] = stream_context_create(array(
         'ssl' => array(
@@ -449,6 +456,8 @@ class Client {
       ));
     }
     $result = drupal_http_request($token_endpoint, $options);
+echo "<h1>oauth2_client Inside getToken auth ,token=$token INSIDE 5 getToken() </h1>";
+var_dump($result);
 
     if ($result->code != 200) {
       throw new \Exception(
@@ -461,6 +470,9 @@ class Client {
     }
 
     $token = drupal_json_decode($result->data);
+
+echo "<h1>oauth2_client Inside getToken auth ,token=$token INSIDE 6 getToken() </h1>";
+var_dump($token);
 
     if (!isset($token['expires_in'])) {
       $token['expires_in'] = 3600;
