@@ -69,7 +69,9 @@ class OAuth2AuthenticationClient {
       'client_id' => 'dummy-client-id',//variable_get('oauth2_authentication_client_id', ''),
       'client_secret' => 'dummy-client-secret', //variable_get('oauth2_authentication_client_secret', ''),
       'authorization_endpoint' => 'http://localhost:8282/o/oauth2/v2/auth',
-      'redirect_uri' => 'http://localhost/formspde-test/oauth2/authorized',
+      //'redirect_uri' => 'http://localhost/formspde-test/oauth2/authorized',
+      'redirect_uri' => 'http://localhost/formspde-test/oauth2callback',
+      
 
     );
 
