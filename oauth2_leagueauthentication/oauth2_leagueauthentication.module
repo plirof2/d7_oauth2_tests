@@ -458,6 +458,85 @@ if(!is_null($code=$_REQUEST['code']) && !is_null($state=$_REQUEST['state'])) {
 require_once('./vendor/autoload.php');
 ///session_start();
 
+
+    $http = new \GuzzleHttp\Client;
+
+    $response = $http->post('http://localhost:8282/oauth2/v4/token', [
+        'form_params' => [
+      'grant_type' => 'authorization_code',
+            'client_id' => 'dummy-client-id',
+            'client_secret' => 'dummy-client-secret',
+            'redirect_uri' => 'http://localhost/formspde-test/gsis_callback',
+            //'code' => $request->code, // Get code from the callback
+            'code' => $_REQUEST['code'], // Get code from the callback
+        ],
+    ]);
+    $data = json_decode((string) $response->getBody());
+    $array = get_object_vars($data);
+    //get user data from oauth
+    $http2 = new \GuzzleHttp\Client;
+
+    // echo the access token; normally we would save this in the DB
+    //return json_decode((string) $response->getBody(), true);
+
+   $data = json_decode((string) $response->getBody());
+     $array = get_object_vars($data);
+
+  //get user data from oauth
+
+    $http2 = new \GuzzleHttp\Client;
+
+      $response2 = $http2->get('http://localhost:8282/oauth2/v3/userinfo', [
+      'headers' => [
+        'Authorization' => 'Bearer ' . $array['access_token'],
+        'Accept'        => 'application/json',
+      ],
+    ]);
+
+   $data2 = json_decode((string) $response2->getBody());
+     $array2 = get_object_vars($data2);
+
+
+
+     /**
+    *
+    * 1)  return to callback in vue with the token from the external authentication
+    *
+    *
+        $response_data=http_build_query([
+          'access_token' => $array['access_token'],
+          'expires_in' => $array['expires_in'],
+          'scope'=> $scope,
+        ]);
+
+        return redirect('http://localhost:8080/#/callback?'.$response_data);
+
+    **/
+
+
+     /**
+    *
+    * 2) return to callback in laravel with the token from the external authentication
+    *
+
+        return [
+          'access_token' => $array['access_token'],
+          'expires_in' => $array['expires_in'],
+          'scope'=> $scope,
+        ];
+
+    **/
+
+
+     /**
+    *
+    *  3) Call to api/login for internal authentication and redirecting to vue front end
+    */
+
+    //$localTokens = $this->revertToLocalAuth($array2);
+    //$response_data=http_build_query($localTokens);
+
+
 $provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
     'clientId'          => 'dummy-client-id',
     'clientSecret'      => 'dummy-client-secret',
@@ -511,7 +590,7 @@ $provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
         ]
         )->getBody(TRUE)->getContents();
 
-        $this->tokenarray = Json::decode($tokenjson);
+        $tokenarray = Json::decode($tokenjson);
 
       //}
         /*
@@ -527,9 +606,9 @@ $provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
       // step3.
       try {
         // TODO check fields.'&fields=id,name,emails';.
-        $getuserurl = $userinfoUrl . "?format=xml&access_token=" . $this->tokenarray['access_token'];
+        $getuserurl = $userinfoUrl . "?format=xml&access_token=" . $tokenarray['access_token'];
         drupal_set_message("USERINFO: getuserurl = this->userinfoUrl =".$getuserurl);
-        $userxml = $this->httpClient->get(
+        $userxml = $httpClient->get(
         $getuserurl, [
           'headers' => [
             'Accept' => 'application/xml',
@@ -601,8 +680,8 @@ drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
 
     // Step 1.
     $_SESSION['gsis_state'] = "_gsis_";
-    return new TrustedRedirectResponse($authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
-
+    //return new TrustedRedirectResponse($authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
+    return array('#markup'=>arg(0).arg(1).$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
 
 
 return array('#markup'=>arg(0).arg(1).'GSIS CALLBACK page');
