@@ -500,14 +500,14 @@ if (!isset($_GET['code'])) {
 
         // We got an access token, let's now get the user's details
         $user = $provider->getResourceOwner($token);
-
+        var_dump($user);
         // Use these details to create a new profile
         printf('Hello %s!', $user->getName());
 
     } catch (Exception $e) {
 
         // Failed to get user details
-        exit('Oh dear...');
+        exit('Oh dear...<BR>'.$e);
     }
 
     // Use this to interact with an API on the users behalf
