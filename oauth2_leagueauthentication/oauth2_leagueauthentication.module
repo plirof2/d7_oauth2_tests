@@ -1,4 +1,5 @@
 <?php
+use GuzzleHttp\Client;
 /**
  * @file
  * Provides functionality for the OAuth2 Authentication module.
@@ -455,7 +456,7 @@ if(!is_null($code=$_REQUEST['code']) && !is_null($state=$_REQUEST['state'])) {
 
 
 require_once('./vendor/autoload.php');
-session_start();
+///session_start();
 
 $provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
     'clientId'          => 'dummy-client-id',
@@ -463,6 +464,11 @@ $provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
     'redirectUri'       => 'http://localhost/formspde-test/gsis_callback',
     'baseUrl'           => 'http://localhost:8282/',
 ]);
+
+      $tokenUrl = 'http://localhost:8282/oauth2/v4/token';
+      $userinfoUrl = 'http://localhost:8282/oauth2/v3/userinfo';
+      $authorizeUrl = 'http://localhost:8282/o/oauth2/v2/auth';
+      $redirectUri       = 'http://localhost/formspde-test/gsis_callback';
 /*
       'token_endpoint' => 'http://localhost:8282/oauth2/v4/token',// variable_get('oauth2_authentication_token_endpoint', ''),
       'auth_flow' => 'server-side',
@@ -474,45 +480,128 @@ $provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
   */    
 
 
-if (!isset($_GET['code'])) {
+    // step2 success get token with code.
+    if (NULL !== $_REQUEST['code']) {
 
-    // If we don't have an authorization code then get one
-    $authUrl = $provider->getAuthorizationUrl();
-    $_SESSION['oauth2state'] = $provider->getState();
-    header('Location: '.$authUrl);
-    exit;
+      $code = $_REQUEST['code'];
+      $state = $_REQUEST['state'];
+      drupal_set_message($code."---".$state);
 
-// Check given state against previously stored one to mitigate CSRF attack
-} elseif (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
 
-    unset($_SESSION['oauth2state']);
-    exit('Invalid state');
+      //try {
+        $gettokenurl = $tokenUrl;
+        $data = [
+          'code' => $code,
+          'redirect_uri' => $redirectUri,
+          'client_id' => 'dummy-client-id',
+          'client_secret' => 'dummy-client-secret',
+          'scope' => '',
+          'grant_type' => 'authorization_code',
+        ];
 
-} else {
+        $body = http_build_query($data);
+        $httpClient = new \GuzzleHttp\Client;
+        $tokenjson = $httpClient->post(
+        $gettokenurl, [
+          'body' => $body,
+          'headers' => [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/x-www-form-urlencoded',
+          ],
+        ]
+        )->getBody(TRUE)->getContents();
 
-    // Try to get an access token (using the authorization code grant)
-    $token = $provider->getAccessToken('authorization_code', [
-        'code' => $_GET['code']
-    ]);
+        $this->tokenarray = Json::decode($tokenjson);
 
-    // Optional: Now you have a token you can look up a users profile data
-    try {
+      //}
+        /*
+      catch (RequestException $e) {
+        watchdog_exception('gsislogin', $e, $e->getMessage());
+        return ['#markup' => $this->t("ERR: 003 Problem in connection with the General Secretariat of Information Systems.")];
+      }
+      catch (ClientException $e) {
+        watchdog_exception('gsislogin', $e, $e->getMessage());
+        return ['#markup' => $this->t("ERR: 004 Problem in connection with the General Secretariat of Information Systems.")];
+      }
+*/
+      // step3.
+      try {
+        // TODO check fields.'&fields=id,name,emails';.
+        $getuserurl = $userinfoUrl . "?format=xml&access_token=" . $this->tokenarray['access_token'];
+        drupal_set_message("USERINFO: getuserurl = this->userinfoUrl =".$getuserurl);
+        $userxml = $this->httpClient->get(
+        $getuserurl, [
+          'headers' => [
+            'Accept' => 'application/xml',
+            'Content-Type' => 'application/x-www-form-urlencoded;',
+          ],
+        ]
+        )->getBody(TRUE)->getContents();
 
-        // We got an access token, let's now get the user's details
-        $user = $provider->getResourceOwner($token);
-        var_dump($user);
-        // Use these details to create a new profile
-        printf('Hello %s!', $user->getName());
+        // In case of error gsis sends JSON !!!
+        $checkerror = Json::decode($userxml);
+        if ($checkerror !== NULL) {
+          return ['#markup' => $this->t("ERR: 005 Data collection problem from the General Secretariat of Information Systems.")];
+        }
+        drupal_set_message("XML=".$userxml);
+        $xml = simplexml_load_string($userxml);
+        
+drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
+        //$userid = $xml->userid;
+        //drupal_set_message("userid====".$userid);
+        //$taxid = $xml->taxid;
+        $userid = $xml->userinfo['userid'][0]->__toString();
+        $taxid = $xml->userinfo['taxid'][0]->__toString();
+        
+        $lastname = $xml->userinfo['lastname'][0]->__toString();
+        $firstname = $xml->userinfo['firstname'][0]->__toString();
+        $fathername = $xml->userinfo['fathername'][0]->__toString();
+        $mothername = $xml->userinfo['mothername'][0]->__toString();
+        $birthyear = $xml->userinfo['birthyear'][0]->__toString();
 
-    } catch (Exception $e) {
 
-        // Failed to get user details
-        exit('Oh dear...<BR>'.$e);
+
+        $userDetails = [
+          "userid" => $userid,
+          "taxid" => $taxid,
+          "lastname" => $lastname,
+          "firstname" => $firstname,
+          "fathername" => $fathername,
+          "mothername" => $mothername,
+          "birthyear" => $birthyear,
+        ];
+
+        print_r($userDetails);
+        $userDetails111 = [
+          "userid" =>$userid,
+          "taxid" => $taxid,
+          "lastname" => "aaaa2222",
+          "firstname" => "aaaa2222",
+          "fathername" => "aaaa2222",
+          "mothername" => "aaaa2222",
+          "birthyear" => "20101010",
+        ];
+        var_dump($userDetails);
+        return array('#markup'=>arg(0).arg(1).'GSIS CALLBACK Now we sahould create a USER');
+        ////$this->createUser($userDetails);
+
+        ///return $this->redirect('<front>');
+
+      }
+      catch (RequestException $e) {
+        watchdog_exception('gsislogin', $e, $e->getMessage());
+        return ['#markup' => $this->t("ERR: 006 Problem of entering data from the General Secretariat of Information Systems.")];
+      }
+      catch (ClientException $e) {
+        watchdog_exception('gsislogin', $e, $e->getMessage());
+        return ['#markup' => $this->t("ERR: 007 Data entry problem by the General Secretariat of Information Systems.")];
+      }
+
     }
 
-    // Use this to interact with an API on the users behalf
-    echo $token->getToken();
-}
+    // Step 1.
+    $_SESSION['gsis_state'] = "_gsis_";
+    return new TrustedRedirectResponse($authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
 
 
 
