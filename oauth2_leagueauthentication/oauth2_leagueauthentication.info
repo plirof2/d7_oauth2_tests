@@ -1,0 +1,20 @@
+name = oauth2_leagueauthentication
+description =oauth2_leagueauthentication  Authenticates Drupal users via OAuth2
+core = 7.x
+package = OAuth2
+
+; Configuration page
+; configure = admin/config/services/oauth2-authentication
+
+; Dependencies
+; dependencies[] = oauth2_client
+
+; Classes
+; files[] = classes/OAuth2AuthenticationClient.class.php
+
+; Information added by Drupal.org packaging script on 2015-01-22
+version = "7.x-1.0+1-dev"
+core = "7.x"
+project = "oauth2_leagueauthentication"
+datestamp = "1421965382"
+
