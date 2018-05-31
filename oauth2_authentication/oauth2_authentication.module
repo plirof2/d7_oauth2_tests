@@ -533,6 +533,12 @@ drupal_set_message("oauth2callback HELLO WORLD calling back");
 //$parsed = drupal_parse_url($url);
 var_dump($_REQUEST);
 
+if(!is_null($code=$_REQUEST['code']) && !is_null($state=$_REQUEST['state'])) {
+  echo "<h1> code=$code <BR> state=$state</h1>";
+
+
+}
+
 return array('#markup'=>arg(0).arg(1).'The quick brown fox says hello, and the lazy dogs thanks you for following conventions.');
 /*
     $class = variable_get('oauth2_authentication_class', 'OAuth2AuthenticationClient');
