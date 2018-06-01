@@ -609,22 +609,23 @@ drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
     // Step 1.
     echo "<h1>INSIDE START A3  step 1 oauth2league_login_page</h1>";
     $_SESSION['gsis_state'] = "_gsis_";
-/*
+
         $getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
-        $userxml = $httpClient->get(
+        /*
+        $userxml = $http->get(
         $getauthurl, [
           'headers' => [
             'Accept' => 'application/xml',
             'Content-Type' => 'application/x-www-form-urlencoded;',
           ],
         ]
-        );//->getBody(TRUE)->getContents();
+        )->getBody(TRUE)->getContents();
 */
     //return new TrustedRedirectResponse($authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
-    return array('#markup'=>arg(0).arg(1).$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
+    //return array('#markup'=>arg(0).arg(1).$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
 
 
-return array('#markup'=>arg(0).arg(1).'GSIS CALLBACK page');
+return array('#markup'=>arg(0).arg(1).$getauthurl);
 }
 
 
