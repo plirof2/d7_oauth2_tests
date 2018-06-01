@@ -1,5 +1,6 @@
 <?php
 use GuzzleHttp\Client;
+
 /**
  * @file
  * Provides functionality for the OAuth2 Authentication module.
@@ -433,7 +434,7 @@ function oauth2_leagueauthentication_init() {
 
 
 
-//##########################  STEP 1 send client_id ##########################################
+//##########################  STEP 1 send client_id #############################$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#############
 /**
  * Determine if we should require the user be authenticated.
  *
@@ -441,108 +442,30 @@ function oauth2_leagueauthentication_init() {
  *   TRUE if we should require the user be authenticated, FALSE otherwise.
  */
 function oauth2league_login_page() {
-  // The 'cas' page is a shortcut to force authentication.
-  if (strtolower(arg(0)) == 'oauth2cas') {
-  //  return TRUE;
-  }
-drupal_set_message("oauth2LEAGUE_login_page");
-var_dump($_REQUEST);
 
-if(!is_null($code=$_REQUEST['code']) && !is_null($state=$_REQUEST['state'])) {
-  echo "<h1> code=$code <BR> state=$state</h1>";
-
-
-}
-
+echo "<h1>INSIDE START A1 oauth2league_login_page</h1>";
 
 require_once('./vendor/autoload.php');
 ///session_start();
 
+  $tag = "_gsis_";
+  $appId = "";
+  $secret = "";
+  $redirectUri = "";
+  $tokenUrl = "";
+  $userinfoUrl = "";
+  $authorizeUrl = "";
+
+  $config = NULL;
+  $language = NULL;
+  $httpClient = NULL;
+
 
     $http = new \GuzzleHttp\Client;
 
-    $response = $http->post('http://localhost:8282/oauth2/v4/token', [
-        'form_params' => [
-      'grant_type' => 'authorization_code',
-            'client_id' => 'dummy-client-id',
-            'client_secret' => 'dummy-client-secret',
-            'redirect_uri' => 'http://localhost/formspde-test/gsis_callback',
-            //'code' => $request->code, // Get code from the callback
-            'code' => $_REQUEST['code'], // Get code from the callback
-        ],
-    ]);
-    $data = json_decode((string) $response->getBody());
-    $array = get_object_vars($data);
-    //get user data from oauth
-    $http2 = new \GuzzleHttp\Client;
-
-    // echo the access token; normally we would save this in the DB
-    //return json_decode((string) $response->getBody(), true);
-
-   $data = json_decode((string) $response->getBody());
-     $array = get_object_vars($data);
-
-  //get user data from oauth
-
-    $http2 = new \GuzzleHttp\Client;
-
-      $response2 = $http2->get('http://localhost:8282/oauth2/v3/userinfo', [
-      'headers' => [
-        'Authorization' => 'Bearer ' . $array['access_token'],
-        'Accept'        => 'application/json',
-      ],
-    ]);
-
-   $data2 = json_decode((string) $response2->getBody());
-     $array2 = get_object_vars($data2);
 
 
 
-     /**
-    *
-    * 1)  return to callback in vue with the token from the external authentication
-    *
-    *
-        $response_data=http_build_query([
-          'access_token' => $array['access_token'],
-          'expires_in' => $array['expires_in'],
-          'scope'=> $scope,
-        ]);
-
-        return redirect('http://localhost:8080/#/callback?'.$response_data);
-
-    **/
-
-
-     /**
-    *
-    * 2) return to callback in laravel with the token from the external authentication
-    *
-
-        return [
-          'access_token' => $array['access_token'],
-          'expires_in' => $array['expires_in'],
-          'scope'=> $scope,
-        ];
-
-    **/
-
-
-     /**
-    *
-    *  3) Call to api/login for internal authentication and redirecting to vue front end
-    */
-
-    //$localTokens = $this->revertToLocalAuth($array2);
-    //$response_data=http_build_query($localTokens);
-
-
-$provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
-    'clientId'          => 'dummy-client-id',
-    'clientSecret'      => 'dummy-client-secret',
-    'redirectUri'       => 'http://localhost/formspde-test/gsis_callback',
-    'baseUrl'           => 'http://localhost:8282/',
-]);
 
       $tokenUrl = 'http://localhost:8282/oauth2/v4/token';
       $userinfoUrl = 'http://localhost:8282/oauth2/v3/userinfo';
@@ -561,7 +484,7 @@ $provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
 
     // step2 success get token with code.
     if (NULL !== $_REQUEST['code']) {
-
+echo "<h1>INSIDE START A1 step2 oauth2league_login_page</h1>";
       $code = $_REQUEST['code'];
       $state = $_REQUEST['state'];
       drupal_set_message($code."---".$state);
@@ -590,7 +513,9 @@ $provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
         ]
         )->getBody(TRUE)->getContents();
 
-        $tokenarray = Json::decode($tokenjson);
+        var_dump($tokenjson);
+        ///$tokenarray = Json::decode($tokenjson);
+
 
       //}
         /*
@@ -605,6 +530,7 @@ $provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
 */
       // step3.
       try {
+        echo "<h1>INSIDE START A2  step 3 oauth2league_login_page</h1>";
         // TODO check fields.'&fields=id,name,emails';.
         $getuserurl = $userinfoUrl . "?format=xml&access_token=" . $tokenarray['access_token'];
         drupal_set_message("USERINFO: getuserurl = this->userinfoUrl =".$getuserurl);
@@ -616,7 +542,7 @@ $provider = new \ChrisHemmings\OAuth2\Client\Provider\Drupal([
           ],
         ]
         )->getBody(TRUE)->getContents();
-
+        var_dump($userxml);
         // In case of error gsis sends JSON !!!
         $checkerror = Json::decode($userxml);
         if ($checkerror !== NULL) {
@@ -679,7 +605,9 @@ drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
     }
 
     // Step 1.
+    echo "<h1>INSIDE START A3  step 1 oauth2league_login_page</h1>";
     $_SESSION['gsis_state'] = "_gsis_";
+
     //return new TrustedRedirectResponse($authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
     return array('#markup'=>arg(0).arg(1).$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
 
