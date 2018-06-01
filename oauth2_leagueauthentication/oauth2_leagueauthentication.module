@@ -515,8 +515,8 @@ echo "<h1>INSIDE START A1 step2 oauth2league_login_page</h1>";
 
         var_dump($tokenjson);
         ///$tokenarray = Json::decode($tokenjson);
-
-
+        $tokenarray = json_decode($tokenjson,true);
+        var_dump($tokenarray);
       //}
         /*
       catch (RequestException $e) {
@@ -544,7 +544,9 @@ echo "<h1>INSIDE START A1 step2 oauth2league_login_page</h1>";
         )->getBody(TRUE)->getContents();
         var_dump($userxml);
         // In case of error gsis sends JSON !!!
-        $checkerror = Json::decode($userxml);
+        //$checkerror = Json::decode($userxml);
+        $checkerror = json_decode($userxml,true);
+
         if ($checkerror !== NULL) {
           return ['#markup' => $this->t("ERR: 005 Data collection problem from the General Secretariat of Information Systems.")];
         }
@@ -564,7 +566,7 @@ drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
         $mothername = $xml->userinfo['mothername'][0]->__toString();
         $birthyear = $xml->userinfo['birthyear'][0]->__toString();
 
-
+        echo "<h1>INSIDE START A2  step 3b oauth2league_login_page</h1>";
 
         $userDetails = [
           "userid" => $userid,
@@ -607,7 +609,17 @@ drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
     // Step 1.
     echo "<h1>INSIDE START A3  step 1 oauth2league_login_page</h1>";
     $_SESSION['gsis_state'] = "_gsis_";
-
+/*
+        $getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
+        $userxml = $httpClient->get(
+        $getauthurl, [
+          'headers' => [
+            'Accept' => 'application/xml',
+            'Content-Type' => 'application/x-www-form-urlencoded;',
+          ],
+        ]
+        );//->getBody(TRUE)->getContents();
+*/
     //return new TrustedRedirectResponse($authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
     return array('#markup'=>arg(0).arg(1).$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
 
