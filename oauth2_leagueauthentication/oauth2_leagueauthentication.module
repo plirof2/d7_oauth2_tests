@@ -280,8 +280,8 @@ function oauth2_leagueauthentication_login_authenticate_validate($form, &$form_s
  * @return
  *   The user's uid on success, or FALSE on failure to authenticate.
  */
-function oauth2_leagueauthentication_authenticate($name, $password) {
-
+function oauth2_leagueauthentication_authenticate($name, $password="bbb") { //SHOULD maybe renamed to not being hook
+    echo "<h1>INSIDE B1a oauth2_leagueauthentication_authenticate </h1>";
   // Assume the user is invalid until we determine otherwise.
   $uid = FALSE;
 
@@ -297,7 +297,7 @@ function oauth2_leagueauthentication_authenticate($name, $password) {
 
     // If the load was successful, we can see if the entered password is valid.
     if ($account) {
-
+      echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate USER EXISTS</h1>";
       // Allow alternate password hashing schemes in checking the password.
       require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
       if (user_check_password($password, $account)) {
@@ -316,23 +316,26 @@ function oauth2_leagueauthentication_authenticate($name, $password) {
         $client->getAccessToken();
       } else {
         // Maybe the remote password has changed and the user is trying new password.
-
+        echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate USER NOT EXISTS (do nothing here)</h1>";
+        /*
         // Check if the user exists remotely.  If so update their account/password.
         if ($client->userExistsRemotely()) {
           $uid = $client->updateUserLocally($account)->uid;
         }
+        */
       }
     }
 
     else /* there is no local user account */ {
       drupal_set_message("ZZZZz oauth2_leagueauthentication_authenticate NO LOCAL USER");
       // Instantiate an OAuth2 Authentication class with the credentials.
+      echo "<h1>INSIDE B1c oauth2_leagueauthentication_authenticate NO LOCAL USER</h1>";
       $class = variable_get('oauth2_leagueauthentication_class', 'OAuth2AuthenticationClient');
       $client = new $class($name, $password);
       
       // Check if the user exists remotely.
       if ($client->getTokenServerSide()) {
-
+        echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate NO LOCAL USER</h1>";
         // We're dealing with a valid remote user so create it locally.
         $uid = $client->createUserLocally()->uid;
       }
@@ -578,20 +581,13 @@ drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
           "birthyear" => $birthyear,
         ];
 
-        print_r($userDetails);
-        $userDetails111 = [
-          "userid" =>$userid,
-          "taxid" => $taxid,
-          "lastname" => "aaaa2222",
-          "firstname" => "aaaa2222",
-          "fathername" => "aaaa2222",
-          "mothername" => "aaaa2222",
-          "birthyear" => "20101010",
-        ];
-        var_dump($userDetails);
-        return array('#markup'=>arg(0).arg(1).'GSIS CALLBACK Now we sahould create a USER');
-        ////$this->createUser($userDetails);
+        //print_r($userDetails);
 
+        var_dump($userDetails);
+        ///oauth2_leagueauthentication_authenticate($userid,$taxid);  // Need to replace Class file
+        return array('#markup'=>arg(0).arg(1).'GSIS CALLBACK Now we should create a USER and then Logout from GSIS');
+        ////$this->createUser($userDetails);
+        
         ///return $this->redirect('<front>');
 
       }
@@ -632,57 +628,3 @@ return array('#markup'=>arg(0).arg(1).$getauthurl);
 
 
 
-
-//##########################  STEP 2 get callback ##########################################
-/**
- * This is called as the redirect_uri
- *
- * @return
- *   TRUE if we should require the user be authenticated, FALSE otherwise.
- */
-function oauth2leaguecallback() {
-  //return array('#markup'=>'The quick brown fox says hello, and the lazy dogs thanks you for following conventions.');
-  // The 'cas' page is a shortcut to force authentication.
-  if (strtolower(arg(0)) == 'oauth2leaguecallback') {
-  //  return TRUE;
-  }
-drupal_set_message("oauth2LEAGUEcallback HELLO WORLD calling back");
-
-//$parsed = drupal_parse_url($url);
-var_dump($_REQUEST);
-
-if(!is_null($code=$_REQUEST['code']) && !is_null($state=$_REQUEST['state'])) {
-  echo "<h1> code=$code <BR> state=$state</h1>";
-
-
-}
-
-return array('#markup'=>arg(0).arg(1).'The quick brown fox says hello, and the lazy dogs thanks you for following conventions.');
-/*
-    $class = variable_get('oauth2_leagueauthentication_class', 'OAuth2AuthenticationClient');
-    $client = new $class("aaa", "bbb");
-
-  // Set the default behavior.
-  $force_login = $client->getAccessToken();         // Get a remote access token if possible.  If it's not possible, the
-        // user can still log in, but he/she won't be able to access remote
-        // resources.
-       
-
-  // If we match the specified paths, reverse the behavior.
-  if ($pages = variable_get('cas_pages', '')) {
-    $path = drupal_get_path_alias($_GET['q']);
-    if (drupal_match_path($path, $pages)) {
-      $force_login = !$force_login;
-    }
-  }
-
-  return $force_login;
-  */
-
-  $arr01["oauth2LEAGUEcallback"]="oauth2LEGUEcallback";
-  $form['#action'] = url('gsis_callback', $arr01);// Call A ROUTE that CALLS taxis
-
-  return $form;
-}
-
-//------------------------------------ CASModifications ------------------------------------
