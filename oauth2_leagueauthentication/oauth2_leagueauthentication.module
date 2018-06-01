@@ -280,11 +280,11 @@ function oauth2_leagueauthentication_login_authenticate_validate($form, &$form_s
  * @return
  *   The user's uid on success, or FALSE on failure to authenticate.
  */
-function oauth2_leagueauthentication_authenticate($name, $password="bbb") { //SHOULD maybe renamed to not being hook
+function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOULD maybe renamed to not being hook
     echo "<h1>INSIDE B1a oauth2_leagueauthentication_authenticate </h1>";
   // Assume the user is invalid until we determine otherwise.
   $uid = FALSE;
-
+  $password="dummy pass";
   // Only check for a valid user if the username & password were set.
   if (!empty($name) && !empty($password)) {
 
@@ -313,7 +313,9 @@ function oauth2_leagueauthentication_authenticate($name, $password="bbb") { //SH
         // Get a remote access token if possible.  If it's not possible, the
         // user can still log in, but he/she won't be able to access remote
         // resources.
-        $client->getAccessToken();
+        //$client->getAccessToken();
+        $access_token=$access_token;//dummy command during migration old oauth2->d8 gsis
+        echo "<h1>INSIDE B1b1 oauth2_leagueauthentication_authenticate USER NOT EXISTS access_token=$access_token</h1>";
       } else {
         // Maybe the remote password has changed and the user is trying new password.
         echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate USER NOT EXISTS (do nothing here)</h1>";
@@ -334,10 +336,10 @@ function oauth2_leagueauthentication_authenticate($name, $password="bbb") { //SH
       $client = new $class($name, $password);
       
       // Check if the user exists remotely.
-      if ($client->getTokenServerSide()) {
+      if (isset($access_token)) {
         echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate NO LOCAL USER</h1>";
         // We're dealing with a valid remote user so create it locally.
-        $uid = $client->createUserLocally()->uid;
+        $uid = $this->createUserLocally()->uid;//ORIG
       }
     }
   }
@@ -345,6 +347,10 @@ function oauth2_leagueauthentication_authenticate($name, $password="bbb") { //SH
   // Return the user's local ID if there is one.
   return $uid;
 }
+
+
+
+
 
 //+++++++++++++++++++++++++ block CASModifications ++++++++++++++++++++++++++++++++++++++++
 
@@ -487,7 +493,7 @@ require_once('./vendor/autoload.php');
 
     // step2 success get token with code.
     if (NULL !== $_REQUEST['code']) {
-echo "<h1>INSIDE START A1 step2 oauth2league_login_page</h1>";
+      echo "<h1>INSIDE START A1 step2 oauth2league_login_page</h1>";
       $code = $_REQUEST['code'];
       $state = $_REQUEST['state'];
       drupal_set_message($code."---".$state);
@@ -556,7 +562,7 @@ echo "<h1>INSIDE START A1 step2 oauth2league_login_page</h1>";
         drupal_set_message("XML=".$userxml);
         $xml = simplexml_load_string($userxml);
         
-drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
+        drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
         //$userid = $xml->userid;
         //drupal_set_message("userid====".$userid);
         //$taxid = $xml->taxid;
@@ -584,7 +590,7 @@ drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
         //print_r($userDetails);
 
         var_dump($userDetails);
-        ///oauth2_leagueauthentication_authenticate($userid,$taxid);  // Need to replace Class file
+        oauth2_leagueauthentication_authenticate($userid,$tokenarray['access_token']);  // Need to replace Class file
         return array('#markup'=>arg(0).arg(1).'GSIS CALLBACK Now we should create a USER and then Logout from GSIS');
         ////$this->createUser($userDetails);
         

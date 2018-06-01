@@ -10,7 +10,7 @@ package = OAuth2
 ; dependencies[] = oauth2_client
 
 ; Classes
-; files[] = classes/OAuth2AuthenticationClient.class.php
+ files[] = classes/OAuth2AuthenticationClient.class.php
 
 ; Information added by Drupal.org packaging script on 2015-01-22
 version = "7.x-1.0+1-dev"
