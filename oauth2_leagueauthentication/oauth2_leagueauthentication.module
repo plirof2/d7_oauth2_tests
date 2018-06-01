@@ -611,6 +611,7 @@ drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
     $_SESSION['gsis_state'] = "_gsis_";
 
         $getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
+        drupal_goto($getauthurl); //redirect to Oauth2 server
         /*
         $userxml = $http->get(
         $getauthurl, [
