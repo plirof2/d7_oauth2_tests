@@ -286,60 +286,34 @@ function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOU
   $uid = FALSE;
   $password="dummy pass";
   // Only check for a valid user if the username & password were set.
-  if (!empty($name) && !empty($password)) {
+  if (!empty($name) /* && !empty($password)*/) {
 
     // Attempt to load a local user with that name.
     $account = user_load_by_name($name);
 
     // Instantiate an OAuth2 Authentication class with the credentials.
-    $class = variable_get('oauth2_leagueauthentication_class', 'OAuth2AuthenticationClient');
-    $client = new $class($name, $password);
+    //$class = variable_get('oauth2_leagueauthentication_class', 'OAuth2AuthenticationClient');
+    //$client = new $class($name, $password);
 
     // If the load was successful, we can see if the entered password is valid.
     if ($account) {
-      echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate USER EXISTS</h1>";
+      echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate USER EXISTS lets auto log him</h1>";
       // Allow alternate password hashing schemes in checking the password.
-      require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
-      if (user_check_password($password, $account)) {
-
-        // Successful authentication.
-        $uid = $account->uid;
-
-        // Update user to new password scheme if needed.
-        if (user_needs_new_hash($account)) {
-          user_save($account, array('pass' => $password));
-        }
-
-        // Get a remote access token if possible.  If it's not possible, the
-        // user can still log in, but he/she won't be able to access remote
-        // resources.
-        //$client->getAccessToken();
-        $access_token=$access_token;//dummy command during migration old oauth2->d8 gsis
-        echo "<h1>INSIDE B1b1 oauth2_leagueauthentication_authenticate USER NOT EXISTS access_token=$access_token</h1>";
-      } else {
-        // Maybe the remote password has changed and the user is trying new password.
-        echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate USER NOT EXISTS (do nothing here)</h1>";
-        /*
-        // Check if the user exists remotely.  If so update their account/password.
-        if ($client->userExistsRemotely()) {
-          $uid = $client->updateUserLocally($account)->uid;
-        }
-        */
-      }
     }
 
     else /* there is no local user account */ {
-      drupal_set_message("ZZZZz oauth2_leagueauthentication_authenticate NO LOCAL USER");
+      //drupal_set_message("oauth2_leagueauthentication_authenticate NO account , NO LOCAL USER");
       // Instantiate an OAuth2 Authentication class with the credentials.
-      echo "<h1>INSIDE B1c oauth2_leagueauthentication_authenticate NO LOCAL USER</h1>";
-      $class = variable_get('oauth2_leagueauthentication_class', 'OAuth2AuthenticationClient');
-      $client = new $class($name, $password);
+      echo "<h1>oauth2_leagueauthentication_authenticate NO account , NO LOCAL USER</h1>";
+      //$class = variable_get('oauth2_leagueauthentication_class', 'OAuth2AuthenticationClient');
+      //$client = new $class($name, $password);
       
       // Check if the user exists remotely.
       if (isset($access_token)) {
         echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate NO LOCAL USER</h1>";
         // We're dealing with a valid remote user so create it locally.
-        $uid = $this->createUserLocally()->uid;//ORIG
+        //$uid = $this->createUserLocally()->uid;//ORIG
+        $uid = oauth2_createUserLocally($name);//ORIG
       }
     }
   }
@@ -349,6 +323,161 @@ function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOU
 }
 
 
+
+  /**
+   * Create a new user based on the successful validation of a remote user.
+   *
+   * This function creates a new local Drupal user if a corresponding remote
+   * user exists, but doesn't exist here yet.
+   *
+   * @return
+   *   A fully-loaded $user object upon successful creation or FALSE on failure.
+   */
+  function oauth2_createUserLocally($name) {
+    global $user;
+    if ($user->uid) {
+      //Don't Login  because we already are
+      return;
+    }    
+
+
+    // Get the user's e-mail address from some remote service.
+    $email = "mymail@example.com";
+
+    // Create a list of user information.
+    $user = array(
+      'name'   => $name,
+      'pass'   => $name, // FIX this OR get it from CAS
+      'mail'   => $email,
+      'status' => 1,
+      'init'   => $email,
+      'roles'  => array(   DRUPAL_AUTHENTICATED_RID => 'authenticated user', ),
+    );
+
+    // ++++++++++++++++++++++++++= FROM CAS MODULE START+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Build the cas_user object and allow modules to alter it.
+    $cas_user = array(
+      'name' => $name,
+      'login' => TRUE,
+      'register' => TRUE, //variable_get('taxis_user_register', TRUE),
+      //'attributes' => cas_phpcas_attributes(),
+    );
+
+    $account = user_load_by_name($name);
+    // Automatic user registration.
+    if (!$account /*&& $cas_user['register']*/) {
+      echo "<h1>INSIDE oauth2_createUserLocally No account could be found attempt to register a new user</h1>";
+      // No account could be found and auto registration is enabled, so attempt
+      // to register a new user.
+      $account = taxis_user_register($name);
+      if (!$account) {
+        // The account could not be created, set a message.
+        echo "<h1>INSIDE oauth2_createUserLocally The account could not be created, set a message.</h1>";
+        if ($force_authentication) {
+          drupal_set_message(t('A new account could not be created for %cas_name. The username is already in use on this site.', array('%cas_name' => $cas_name)), 'error');
+        }
+        return;
+      }
+    }
+
+
+
+    // Populate $edit with some basic properties.
+   // $edit['user'] = $user;
+    ///$edit['roles'] = $account->roles + cas_roles();
+   // $edit['roles'] = /*$account->roles;// + */array(DRUPAL_AUTHENTICATED_RID => TRUE);
+
+    /*
+    if (module_exists('persistent_login') && !empty($_SESSION['cas_remember'])) {
+      $edit['values']['persistent_login'] = 1;
+    }
+    */
+    // Allow other modules to make their own custom changes.
+    //cas_user_module_invoke('presave', $edit, $account);
+
+    // Save the user account and log the user in.
+    //$user = user_save($account, $edit);
+    //user_login_finalize($edit);
+    // ++++++++++++++++++++++++++= FROM CAS MODULE  END+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // Save the new user.
+    ///$user = user_save(NULL, $user);
+
+    // Report the new user in the log.
+    watchdog('oauth2_authentication', 'New user: %name (%email).', array(
+      '%name' => $name,
+      '%email' => $email ? $email : 'no e-mail address',
+    ), WATCHDOG_NOTICE, l(t('edit'), 'user/' . $user->uid . '/edit'));
+    echo "<h1>INSIDE oauth2_createUserLocally ok USER $name CREATED</h1>";
+    // Return it.
+    return $user;
+  }
+
+
+/**
+ * Register a CAS user with some default values.
+ *
+ * @param $cas_name
+ *   The name of the CAS user.
+ * @param $options
+ *   An associative array of options, with the following elements:
+ *    - 'edit': An array of fields and values for the new user. If omitted,
+ *      reasonable defaults are used.
+ *    - 'invoke_cas_user_presave': Defaults to FALSE. Whether or not to invoke
+ *      hook_cas_user_presave() on the newly created account.
+ *
+ * @return
+ *   The user object of the created user, or FALSE if the user cannot be
+ *   created.
+ */
+function taxis_user_register($cas_name, $options = array()) {
+  $gsis_role_id=user_role_load_by_name("GSIS_USER");
+  //echo "<h1>ROLE GOT= $gsis_role_id->rid</h1>";
+  // Add some reasonable defaults if they have not yet been provided.
+  //$edit = isset($options['edit']) ? $options['edit'] : array();
+  $edit=array();
+  $edit += array(
+    'name' => $cas_name,
+    'pass' => user_password(),
+    'init' => $cas_name,
+    'mail' => $cas_name."@example.com",//variable_get('cas_domain', '') ? $cas_name . '@' . variable_get('cas_domain', '') : '',
+    'status' => 1,
+    //'roles' => array('roles' => array($gsis_role => $gsis_role)) ,
+    //'roles' => array('10' => 10) , //OK GSIS
+    'roles' => array($gsis_role_id->rid => $gsis_role_id->rid) ,
+  );
+  ///$edit['roles'] += cas_roles();
+  //$edit['cas_name'] = $cas_name;
+
+  // See if the user name is already taken.
+  if ((bool) db_select('users')->fields('users', array('name'))->condition('name', db_like($edit['name']), 'LIKE')->range(0, 1)->execute()->fetchField()) {
+    return FALSE;
+  }
+
+  // Create the user account.
+  $account = user_save(drupal_anonymous_user(), $edit);
+  watchdog("user", 'new user: %n (CAS)', array('%n' => format_username($account)), WATCHDOG_NOTICE, l(t("edit user"), "user/edit/$account->uid"));
+
+  if (!empty($options['invoke_cas_user_presave'])) {
+    // Populate $edit with some basic properties.
+    $edit = array(
+      'cas_user' => array(
+        'name' => $cas_name,
+      ),
+    );
+
+    // Allow other modules to make their own custom changes.
+    //cas_user_module_invoke('presave', $edit, $account);
+
+    // Clean up extra variables before saving.
+    //unset($edit['cas_user']);
+
+    $account = user_save($account, $edit);
+  }
+  echo "<h1>INSIDE taxis_user_register ok USER $name CREATED</h1>";
+  // Reload to ensure that we have a fully populated user object.
+  return user_load($account->uid);
+}
 
 
 
@@ -476,10 +605,10 @@ require_once('./vendor/autoload.php');
 
 
 
-      $tokenUrl = 'http://localhost:8282/oauth2/v4/token';
-      $userinfoUrl = 'http://localhost:8282/oauth2/v3/userinfo';
+      $tokenUrl     = 'http://localhost:8282/oauth2/v4/token';
+      $userinfoUrl  = 'http://localhost:8282/oauth2/v3/userinfo';
       $authorizeUrl = 'http://localhost:8282/o/oauth2/v2/auth';
-      $redirectUri       = 'http://localhost/formspde-test/gsis_callback';
+      $redirectUri  = 'http://localhost/formspde-test/gsis_callback';
 /*
       'token_endpoint' => 'http://localhost:8282/oauth2/v4/token',// variable_get('oauth2_authentication_token_endpoint', ''),
       'auth_flow' => 'server-side',
