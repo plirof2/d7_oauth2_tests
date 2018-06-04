@@ -155,9 +155,9 @@ function oauth2_leagueauthentication_form_user_login_block_alter(&$form, &$form_
  * which fields are to enabled or disabled, go to the module configuration page.
  * By default, they are all disabled.
  */
-function oauth2_leagueauthentication_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
-  global $user;
-  drupal_set_message( "PROFILE FORM ALTER helloooo  oauth2_leagueauthentication_form_user_profile_form_alte");
+//function oauth2_leagueauthentication_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
+//  global $user;
+//  drupal_set_message( "PROFILE FORM ALTER helloooo  oauth2_leagueauthentication_form_user_profile_form_alte");
 /*
   // We want to keep user fields editable for user administrators so exit if the
   // current user is one of them.
@@ -191,7 +191,7 @@ function oauth2_leagueauthentication_form_user_profile_form_alter(&$form, &$form
   }
 
   */
-}
+//}
 
 /**
  * Implements hook_user_logout().
