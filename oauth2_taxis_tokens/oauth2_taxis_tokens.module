@@ -1,0 +1,184 @@
+<?php
+/**
+ * @file
+ * Provides OAuth2 tokens
+ */
+
+
+/**
+* Implements hook_token_info().
+* You first of all have to define your token in the hook_token_info(): -
+  See more at: http://www.whenwhowhere.com/tech-blog/create-custom-token-drupal-7#sthash.6IQaG7A5.dpuf
+If you define your token in ['tokens']['user'] like I did it will appear in the available tokens under user
+but you can change it to another option, in my case this is what made most sense.
+This will apply for all token lists which can retrieve user information,
+
+
+* 
+*/
+function oauth2_taxis_tokens_token_info() { 
+  $info['tokens']['user']['GSIS-taxis-afm'] = array(
+  //$info['tokens']['dummy'] = array(
+    'name' => t('GSIS-taxis-afm user dummy'),
+    'description' => t('current-user Returns the afm dummy item)'),
+  );
+  $info['tokens']['user']['GSIS-taxis-username'] = array(
+  //$info['tokens']['dummy'] = array(
+    'name' => t('GSIS-taxis-username dummy'),
+    'description' => t('current-user Returns the Username dummy item)'),
+  );  
+  $info['tokens']['user']['GSIS-taxis-name'] = array(
+  //$info['tokens']['dummy'] = array(
+    'name' => t('GSIS-taxis-name dummy'),
+    'description' => t('current-user Returns the name dummy item)'),
+  );  
+  $info['tokens']['user']['GSIS-taxis-surname'] = array(
+  //$info['tokens']['dummy'] = array(
+    'name' => t('GSIS-taxis-surname dummy'),
+    'description' => t('current-user Returns the surname dummy item)'),
+  );  
+  $info['tokens']['user']['GSIS-taxis-fathername'] = array(
+  //$info['tokens']['dummy'] = array(
+    'name' => t('GSIS-taxis-fathername dummy'),
+    'description' => t('current-user Returns the fathername dummy item)'),
+  );  
+  $info['tokens']['user']['GSIS-taxis-mothername'] = array(
+  //$info['tokens']['dummy'] = array(
+    'name' => t('GSIS-taxis-mothername dummy'),
+    'description' => t('current-user Returns the mothername item)'),
+  );  
+
+
+  return $info;
+}
+
+
+/* Now we need to actually return the contents (or replacement value) of this token and
+ * this is done in the hook_tokens():
+*/
+ 
+/**
+* Implements hook_tokens().
+*/
+function oauth2_taxis_tokens_tokens($type, $tokens, array $data = array(), array $options = array()) {
+ $replacements = array();   
+   if ($type == 'current-user') {   
+     foreach ($tokens as $name => $original) {     
+      switch ($name) {
+        case 'GSIS-taxis-afm':
+          $name = 'Hello GSIS-taxis-afm';
+          $replacements[$original] = $name;
+          break;
+        case 'GSIS-taxis-username':
+          $name = 'Hello GSIS-taxis-username';
+          $replacements[$original] = $name;
+          break;
+        case 'GSIS-taxis-name':
+          $name = 'Hello GSIS-taxis-name';
+          $replacements[$original] = $name;
+          break;                    
+        case 'GSIS-taxis-surname':
+          $name = 'Hello GSIS-taxis-surname';
+          $replacements[$original] = $name;
+          break;
+        case 'GSIS-taxis-fathername':
+          $name = 'Hello GSIS-taxis-fathername';
+          $replacements[$original] = $name;
+          break;
+        case 'GSIS-taxis-mothername':
+          $name = 'Hello GSIS-taxis-mothername';
+          $replacements[$original] = $name;
+          break;
+
+      }
+     }
+  }
+
+  return $replacements;  
+}
+
+ 
+/**
+ * Implements hook_menu().
+ */
+/*
+function oauth2_taxis_tokens_menu() {
+  $items['examples/token_test'] = array(
+    'title' => 'Token example',
+    'description' => 'Test replacement tokens in real time.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('oauth2_taxis_tokens_example_form'),
+    'access callback' => TRUE,
+  );
+  return $items;
+}
+ 
+
+function oauth2_taxis_tokens_example_form($form, &$form_state) {
+  $entities = entity_get_info();
+   
+  $token_types = array();
+  $form = array();
+     
+  if (!empty( $form_state['storage']['title_dummy']))  
+  $form['title_dummy']['#default_value'] = $form_state['storage']['title_dummy'];
+  
+  $form['title_dummy'] = array(
+  '#type' => 'textfield',
+  '#title' => t('Subject'),  
+  '#size' => 60,
+  '#maxlength' => 128,
+  '#required' => TRUE,
+);
+  $form['text'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Enter your text here'),
+    '#default_value' => 'Hello [current-user:name]!'
+  );
+ 
+  if(!empty( $form_state['storage']['desc']))   
+    $form['text']['#default_value'] = $form_state['storage']['desc'];
+ 
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+ // Token tree display STARTS
+  if (module_exists('token')) {
+    $form['token_tree'] = array(
+      '#theme' => 'token_tree',
+      '#token_types' => $token_types,
+    );
+  }
+  else {
+    $form['token_tree'] = array(
+      '#markup' => '<p>' . t('Enable the <a href="@drupal-token">Token module</a> to view the available token browser.', array('@drupal-token' => 'http://drupal.org/project/token')) . '</p>',
+    );
+  }
+ // Token tree display ENDS
+    return $form;
+   
+}
+
+*/
+
+/**
+ * Submit callback; store the submitted values into storage.
+ */
+/*
+function oauth2_taxis_tokens_example_form_submit($form, &$form_state) {
+ 
+ $replaced_text =  token_replace($form_state['values']['text']);
+  $insert = db_insert('test') 
+   ->fields(array(
+  'title' => $form_state['values']['title_dummy'],
+  'description' => $replaced_text, 
+))
+->execute();
+ // The replacement values will save in database
+  drupal_set_message('Record inserted successfully');
+  
+  
+}
+
+*/
