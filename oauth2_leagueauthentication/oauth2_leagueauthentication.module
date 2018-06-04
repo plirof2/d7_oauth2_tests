@@ -109,6 +109,7 @@ function oauth2_leagueauthentication_menu_alter(&$items) {
  * exists as per the remote authorization service, but not locally, we want to
  * create it.
  */
+/*
 function oauth2_leagueauthentication_form_user_login_alter(&$form, &$form_state, $form_id) {
 
   // Replace the user_login_authenticate_validate() call with our own
@@ -127,10 +128,11 @@ drupal_set_message( "FORM LOGIN helloooo oauth2_leagueauthentication_form_user_l
   }
   
 }
-
+*/
 /**
  * Implements hook_form_FORM_ID_alter() for the user_login_block form.
  */
+/*
 function oauth2_leagueauthentication_form_user_login_block_alter(&$form, &$form_state, $form_id) {
   global $user;
   drupal_set_message( "LOGIN BLOCK helloooo  oauth2_leagueauthentication_form_user_login_block_alter");
@@ -140,16 +142,10 @@ function oauth2_leagueauthentication_form_user_login_block_alter(&$form, &$form_
   oauth2_leagueauthentication_form_user_login_alter($form, $form_state, $form_id);
 
   // Disable password-reset links if applicable.
-  /* This produces ERROR
-  if ((!variable_get('oauth2_leagueauthentication_user_edit_password', FALSE)) &&
-      ($user->uid != 1)) {
-    $form['links'] = '';
-  }
 
-*/
 
 }
-
+*/
 
 /**
  * Implements hook_form_FORM_ID_alter() for the user_profile_form form.
@@ -299,12 +295,12 @@ function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOU
     if ($account) {
       echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate USER EXISTS lets auto log him</h1>";
       //user_login_finalize($account);
-      $login_array = array ('name' => $name);
-      user_login_finalize($login_array);
+      //local_taxis_user_autologin($name);
+      local_taxis_user_autologin($account);
 
       //global $user;
-      //$user = user_load($account->uid);
-      //drupal_session_regenerate();
+      $user = user_load($account->uid);
+      drupal_session_regenerate();
 
       echo "<h1>INSIDE oauth2_leagueauthentication_authenticate We should be LOGGED in By Now </h1>";
       // Allow alternate password hashing schemes in checking the password.
@@ -323,6 +319,7 @@ function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOU
         // We're dealing with a valid remote user so create it locally.
         //$uid = $this->createUserLocally()->uid;//ORIG
         $uid = oauth2_createUserLocally($name);//ORIG
+
       }
     }
   }
@@ -331,6 +328,40 @@ function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOU
   return $uid;
 }
 
+
+function local_taxis_user_autologin($user){
+      //$login_array = array ('name' => "jackuser2");//$name);
+      //user_login_finalize($login_array);
+      //      user_login_finalize($name);
+
+      //$user_name = user_load($user->uid);
+      $user_name = user_load(80);
+      //drupal_session_regenerate();
+
+      //global $user;
+      watchdog('user', 'Session opened for %name.', array(
+        '%name' => $user->name,
+      ));
+
+      // Update the user table timestamp noting user has logged in.
+      // This is also used to invalidate one-time login links.
+/*      $user->login = REQUEST_TIME;
+      db_update('users')
+        ->fields(array(
+        'login' => $user->login,
+      ))
+        ->condition('uid', $user->uid)
+        ->execute();
+*/
+      // Regenerate the session ID to prevent against session fixation attacks.
+      // This is called before hook_user in case one of those functions fails
+      // or incorrectly does a redirect which would leave the old session in place.
+      drupal_session_regenerate();
+      //user_module_invoke('login', $edit, $user);
+      user_module_invoke('login', $user, $user);
+
+
+}
 
 
   /**
@@ -387,6 +418,8 @@ function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOU
         }
         return;
       }
+      local_taxis_user_autologin($name);
+      return $account;
     }
 
 
@@ -590,10 +623,10 @@ function oauth2_leagueauthentication_init() {
  */
 function oauth2league_login_page() {
 
-echo "<h1>INSIDE START A1 oauth2league_login_page</h1>";
+  echo "<h1>INSIDE START A1 oauth2league_login_page</h1>";
 
-require_once('./vendor/autoload.php');
-///session_start();
+  require_once('./vendor/autoload.php');
+  ///session_start();
 
   $tag = "_gsis_";
   $appId = "";
