@@ -298,6 +298,15 @@ function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOU
     // If the load was successful, we can see if the entered password is valid.
     if ($account) {
       echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate USER EXISTS lets auto log him</h1>";
+      //user_login_finalize($account);
+      $login_array = array ('name' => $name);
+      user_login_finalize($login_array);
+
+      //global $user;
+      //$user = user_load($account->uid);
+      //drupal_session_regenerate();
+
+      echo "<h1>INSIDE oauth2_leagueauthentication_authenticate We should be LOGGED in By Now </h1>";
       // Allow alternate password hashing schemes in checking the password.
     }
 
