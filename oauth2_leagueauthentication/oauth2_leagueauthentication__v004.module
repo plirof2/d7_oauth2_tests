@@ -338,6 +338,7 @@ function taxis_loginUserLocally($account)
 
 
 
+
   /**
    * Create a new user based on the successful validation of a remote user.
    *
@@ -354,7 +355,29 @@ function taxis_loginUserLocally($account)
       return;
     }    
 
-    // ++++++++++++++++++++++++++= FROM CAS MODULE START+++++++++++++++++++++++++++++++++++++++++++++++++++++++    
+
+    // Get the user's e-mail address from some remote service.
+    $email = "mymail@example.com";
+
+    // Create a list of user information.
+    $user = array(
+      'name'   => $name,
+      'pass'   => $name, // FIX this OR get it from CAS
+      'mail'   => $email,
+      'status' => 1,
+      'init'   => $email,
+      'roles'  => array(   DRUPAL_AUTHENTICATED_RID => 'authenticated user', ),
+    );
+
+    // ++++++++++++++++++++++++++= FROM CAS MODULE START+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Build the cas_user object and allow modules to alter it.
+    $cas_user = array(
+      'name' => $name,
+      'login' => TRUE,
+      'register' => TRUE, //variable_get('taxis_user_register', TRUE),
+      //'attributes' => cas_phpcas_attributes(),
+    );
+
     $account = user_load_by_name($name);
     // Automatic user registration.
     if (!$account /*&& $cas_user['register']*/) {
@@ -698,21 +721,6 @@ function oauth2league_login_page() {
         $fathername = $xml->userinfo['fathername'][0]->__toString();
         $mothername = $xml->userinfo['mothername'][0]->__toString();
         $birthyear = $xml->userinfo['birthyear'][0]->__toString();
-
-
-        if($taxid!=NULL && !isset($_SESSION['GSIS-session-afm']))
-        {
-          $_SESSION['GSIS-session-afm'] = $taxid;
-          $_SESSION['GSIS-session-username'] = $userid;
-          $_SESSION['GSIS-session-lastname'] = $lastname;
-          $_SESSION['GSIS-session-firstname'] = $firstname;
-          $_SESSION['GSIS-session-fathername'] = $fathername;
-          $_SESSION['GSIS-session-mothername'] = $mothername;
-          $_SESSION['GSIS-session-birthyear'] = $birthyear;
-        }
-        //$GSIS-session-afm = & $_SESSION['xyz'];
-
-
 
         echo "<h1>INSIDE START A2  step 3b oauth2league_login_page</h1>";
 

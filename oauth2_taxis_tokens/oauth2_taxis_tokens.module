@@ -19,35 +19,39 @@ This will apply for all token lists which can retrieve user information,
 function oauth2_taxis_tokens_token_info() { 
   $info['tokens']['user']['GSIS-taxis-afm'] = array(
   //$info['tokens']['dummy'] = array(
-    'name' => t('GSIS-taxis-afm user dummy'),
-    'description' => t('current-user Returns the afm dummy item)'),
+    'name' => t('GSIS-taxis-afm user'),
+    'description' => t('current-user Returns the afm item)'),
   );
   $info['tokens']['user']['GSIS-taxis-username'] = array(
   //$info['tokens']['dummy'] = array(
-    'name' => t('GSIS-taxis-username dummy'),
-    'description' => t('current-user Returns the Username dummy item)'),
+    'name' => t('GSIS-taxis-username'),
+    'description' => t('current-user Returns the Username item)'),
   );  
-  $info['tokens']['user']['GSIS-taxis-name'] = array(
+  $info['tokens']['user']['GSIS-taxis-firstname'] = array(
   //$info['tokens']['dummy'] = array(
-    'name' => t('GSIS-taxis-name dummy'),
-    'description' => t('current-user Returns the name dummy item)'),
+    'name' => t('GSIS-taxis-firstname'),
+    'description' => t('current-user Returns the first name item)'),
   );  
-  $info['tokens']['user']['GSIS-taxis-surname'] = array(
+  $info['tokens']['user']['GSIS-taxis-lastname'] = array(
   //$info['tokens']['dummy'] = array(
-    'name' => t('GSIS-taxis-surname dummy'),
-    'description' => t('current-user Returns the surname dummy item)'),
+    'name' => t('GSIS-taxis-lastname'),
+    'description' => t('current-user Returns the lastname item)'),
   );  
   $info['tokens']['user']['GSIS-taxis-fathername'] = array(
   //$info['tokens']['dummy'] = array(
-    'name' => t('GSIS-taxis-fathername dummy'),
-    'description' => t('current-user Returns the fathername dummy item)'),
+    'name' => t('GSIS-taxis-fathername'),
+    'description' => t('current-user Returns the fathername item)'),
   );  
   $info['tokens']['user']['GSIS-taxis-mothername'] = array(
   //$info['tokens']['dummy'] = array(
-    'name' => t('GSIS-taxis-mothername dummy'),
+    'name' => t('GSIS-taxis-mothername'),
     'description' => t('current-user Returns the mothername item)'),
   );  
-
+  $info['tokens']['user']['GSIS-taxis-birthyear'] = array(
+  //$info['tokens']['dummy'] = array(
+    'name' => t('GSIS-taxis-birthyear'),
+    'description' => t('current-user Returns the birthyaer item)'),
+  ); 
 
   return $info;
 }
@@ -62,42 +66,69 @@ function oauth2_taxis_tokens_token_info() {
 */
 function oauth2_taxis_tokens_tokens($type, $tokens, array $data = array(), array $options = array()) {
  $replacements = array();   
-   if ($type == 'current-user') {   
+   
+   if ($type == 'current-user' ) {   
      foreach ($tokens as $name => $original) {     
       switch ($name) {
         case 'GSIS-taxis-afm':
-          $name = 'Hello GSIS-taxis-afm';
-          $replacements[$original] = $name;
+          $name=$_SESSION['GSIS-session-afm'];
+          if($name==null)$name = 'GSIS-taxis value NOT set-afm';
+          $replacements[$original] = $name ;//"aaaaa ORIGINAL gsis AFM ,orig=".$original;
           break;
         case 'GSIS-taxis-username':
-          $name = 'Hello GSIS-taxis-username';
+          $name=$_SESSION['GSIS-session-username'];
+          if($name==null)$name = 'GSIS-taxis value NOT set-username';
           $replacements[$original] = $name;
           break;
-        case 'GSIS-taxis-name':
-          $name = 'Hello GSIS-taxis-name';
+        case 'GSIS-taxis-firstname':
+          $name=$_SESSION['GSIS-session-firstname'];
+          if($name==null)$name = 'GSIS-taxis value NOT set-firstname';
           $replacements[$original] = $name;
           break;                    
-        case 'GSIS-taxis-surname':
-          $name = 'Hello GSIS-taxis-surname';
+        case 'GSIS-taxis-lastname':
+          $name=$_SESSION['GSIS-session-lastname'];
+          if($name==null)$name = 'GSIS-taxis value NOT set-lastname';
           $replacements[$original] = $name;
           break;
         case 'GSIS-taxis-fathername':
-          $name = 'Hello GSIS-taxis-fathername';
+          $name=$_SESSION['GSIS-session-fathername'];
+          if($name==null)$name = 'GSIS-taxis value NOT set-fathername';
           $replacements[$original] = $name;
           break;
         case 'GSIS-taxis-mothername':
-          $name = 'Hello GSIS-taxis-mothername';
+          $name=$_SESSION['GSIS-session-mothername'];
+          if($name==null)$name = 'GSIS-taxis value NOT set-mothername';
           $replacements[$original] = $name;
           break;
+        case 'GSIS-taxis-birthyear':
+          $name=$_SESSION['GSIS-session-birthyear'];
+          if($name==null)$name = 'GSIS-taxis value NOT set-birthyear';
+          $replacements[$original] = $name;
+          break;          
 
       }
      }
+
   }
 
   return $replacements;  
 }
 
  
+function oauth2_taxis_tokens_tokens_alter(array &$replacements, array $context) {
+  if ($context['type'] == 'current-user' && !empty($context['data']['webform-submission'])) {
+    // $submission = $context['data']['webform-submission'];
+    // $node = $context['data']['node'] ? $context['data']['node'] : node_load($submission->nid);
+
+    // Find any token starting with submission:values.
+    if ($value_tokens = token_find_with_prefix($context['tokens'], 'values')) {
+      if (!empty($value_tokens['total_points'])) {
+        $replacements[$value_tokens['total_points']] = 100;
+      }
+    }
+  }
+}
+
 /**
  * Implements hook_menu().
  */
