@@ -331,7 +331,9 @@ function taxis_loginUserLocally($account)
     $user = user_load($account->uid);
     $login_array = array('name' => $account->name);
     //$form_state['redirect'] = 'user/' . $user->uid;  //REDIRECT does NOT work...
-    
+    drupal_set_message ("334 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
+    if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto($_SESSION['GSIS-session-last-webform-url']);
+    //if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto('node/4');
     user_login_finalize($login_array);
 }
 
@@ -516,14 +518,15 @@ function oauth2_leagueauthentication_login_block($form) {
     // Instantiate an OAuth2 Authentication class with the credentials.
     //$class = variable_get('oauth2_leagueauthentication_class', 'OAuth2AuthenticationClient');
     //$client = new $class($name, $password);
-
+  echo "<h3>CURRENT PATH =". request_path()."</h3>";
   //$form['#action'] = url('cas', array('query' => drupal_get_destination()));
   //$form['#action'] = url('oauth2/authorized', array('query' => drupal_get_destination()));// Call A ROUTE that CALLS taxis
 	$arr01=array("1"=>"oauth2_leagueauthentication_login_block");
-	$arr01["hello"]="hi";
+	$arr01["my_current_path"]=request_path();
 	$form['#action'] = url('gsis_callback', $arr01);// Call A ROUTE that CALLS taxis
-  $form['#id'] = 'oauth2_leagueauthentication-login-form';
 
+  $form['#id'] = 'oauth2_leagueauthentication-login-form';
+  $_SESSION['GSIS-session-last-webform-url'] = request_path();
   $form['oauth2_leagueauthentication_login_redirection_message'] = array(
     '#type' => 'item',
     '#markup' => t(variable_get('oauth2_leagueauthentication_login_redir_message', "oauth2_leagueauthentication_LOGIN_REDIR_MESSAGE")),
@@ -665,6 +668,7 @@ function oauth2league_login_page() {
       try {
         echo "<h1>INSIDE START A2  step 3 oauth2league_login_page</h1>";
         // TODO check fields.'&fields=id,name,emails';.
+        drupal_set_message ("671 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
         $getuserurl = $userinfoUrl . "?format=xml&access_token=" . $tokenarray['access_token'];
         drupal_set_message("USERINFO: getuserurl = this->userinfoUrl =".$getuserurl);
         $userxml = $httpClient->get(
@@ -686,7 +690,7 @@ function oauth2league_login_page() {
         drupal_set_message("XML=".$userxml);
         $xml = simplexml_load_string($userxml);
         
-        drupal_set_message('AAAAAAAAAAA DECODE'.($userxml));
+        drupal_set_message('AAAAAAAAAAA Now decoding '.($userxml));
         //$userid = $xml->userid;
         //drupal_set_message("userid====".$userid);
         //$taxid = $xml->taxid;
@@ -698,10 +702,11 @@ function oauth2league_login_page() {
         $fathername = $xml->userinfo['fathername'][0]->__toString();
         $mothername = $xml->userinfo['mothername'][0]->__toString();
         $birthyear = $xml->userinfo['birthyear'][0]->__toString();
+        drupal_set_message ("704 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
 
-
+        // Set session variables so we can use them from oauth2_taxis_tokens module
         if($taxid!=NULL && !isset($_SESSION['GSIS-session-afm']))
-        {
+        { // NOTE : userinfo is NOT saved in database. It is just stored in session
           $_SESSION['GSIS-session-afm'] = $taxid;
           $_SESSION['GSIS-session-username'] = $userid;
           $_SESSION['GSIS-session-lastname'] = $lastname;
@@ -710,8 +715,6 @@ function oauth2league_login_page() {
           $_SESSION['GSIS-session-mothername'] = $mothername;
           $_SESSION['GSIS-session-birthyear'] = $birthyear;
         }
-        //$GSIS-session-afm = & $_SESSION['xyz'];
-
 
 
         echo "<h1>INSIDE START A2  step 3b oauth2league_login_page</h1>";
@@ -750,6 +753,8 @@ function oauth2league_login_page() {
     // Step 1.
     echo "<h1>INSIDE START A3  step 1 oauth2league_login_page</h1>";
     $_SESSION['gsis_state'] = "_gsis_";
+//    $_SESSION['GSIS-session-last-webform-url'] = request_path();
+    drupal_set_message ("756 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
 
         $getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
         drupal_goto($getauthurl); //redirect to Oauth2 server
