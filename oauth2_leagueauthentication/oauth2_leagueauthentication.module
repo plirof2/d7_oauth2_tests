@@ -526,7 +526,8 @@ function oauth2_leagueauthentication_login_block($form) {
 	$form['#action'] = url('gsis_callback', $arr01);// Call A ROUTE that CALLS taxis
 
   $form['#id'] = 'oauth2_leagueauthentication-login-form';
-  $_SESSION['GSIS-session-last-webform-url'] = request_path();
+  session_start();
+  $_SESSION['GSIS-session-last-webform-url'] = request_path(); // Store path in session to redirect after login
   $form['oauth2_leagueauthentication_login_redirection_message'] = array(
     '#type' => 'item',
     '#markup' => t(variable_get('oauth2_leagueauthentication_login_redir_message', "oauth2_leagueauthentication_LOGIN_REDIR_MESSAGE")),
