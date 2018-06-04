@@ -7,7 +7,7 @@ package = OAuth2
 ; configure = admin/config/services/oauth2-authentication
 
 ; Dependencies
-; dependencies[] = oauth2_client
+dependencies[] = oauth2_taxis_tokens
 
 ; Classes
  files[] = classes/OAuth2AuthenticationClient.class.php
