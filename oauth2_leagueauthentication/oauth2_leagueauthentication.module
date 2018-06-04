@@ -296,7 +296,8 @@ function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOU
       echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate USER EXISTS lets auto log him</h1>";
       //user_login_finalize($account);
       //local_taxis_user_autologin($name);
-      local_taxis_user_autologin($account);
+      //local_taxis_user_autologin($account);
+      loginUser($account);
 
       //global $user;
       $user = user_load($account->uid);
@@ -329,39 +330,19 @@ function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOU
 }
 
 
-function local_taxis_user_autologin($user){
-      //$login_array = array ('name' => "jackuser2");//$name);
-      //user_login_finalize($login_array);
-      //      user_login_finalize($name);
-
-      //$user_name = user_load($user->uid);
-      $user_name = user_load(80);
-      //drupal_session_regenerate();
-
-      //global $user;
-      watchdog('user', 'Session opened for %name.', array(
-        '%name' => $user->name,
-      ));
-
-      // Update the user table timestamp noting user has logged in.
-      // This is also used to invalidate one-time login links.
-/*      $user->login = REQUEST_TIME;
-      db_update('users')
-        ->fields(array(
-        'login' => $user->login,
-      ))
-        ->condition('uid', $user->uid)
-        ->execute();
-*/
-      // Regenerate the session ID to prevent against session fixation attacks.
-      // This is called before hook_user in case one of those functions fails
-      // or incorrectly does a redirect which would leave the old session in place.
-      drupal_session_regenerate();
-      //user_module_invoke('login', $edit, $user);
-      user_module_invoke('login', $user, $user);
-
-
+function loginUser($account)
+{
+    global $user;
+    // Override the global user.
+    $user = user_load($account->uid);
+    $login_array = array('name' => $account->name);
+    //$form_state['redirect'] = 'user/' . $user->uid;  //REDIRECT does NOT work...
+    
+    user_login_finalize($login_array);
 }
+
+
+
 
 
   /**
@@ -418,7 +399,8 @@ function local_taxis_user_autologin($user){
         }
         return;
       }
-      local_taxis_user_autologin($name);
+      //local_taxis_user_autologin($name);
+      loginUser($account);
       return $account;
     }
 
