@@ -16,11 +16,21 @@ http://forms2.minedu.gov.gr/formspde/gsis?code=t8229A&state=_gsis_6857058725b0fa
 
  function oauth2_getUrl($url_name){
  	$wanter_url="";
+
+ 	
+ 	// NODE js server
  	if($url_name=='tokenUrl')     	return 'http://localhost:8282/oauth2/v4/token';
     if($url_name=='userinfoUrl')     return 'http://localhost:8282/oauth2/v3/userinfo';
     if($url_name=='authorizeUrl')    return 'http://localhost:8282/o/oauth2/v2/auth';
     if($url_name=='redirectUri')     return 'http://localhost/formspde-test/gsis_callback';
-
+	
+	/*
+	//GSIS test server
+ 	if($url_name=='tokenUrl')     	return 'https://test.gsis.gr/oauth2server/oauth/token';
+    if($url_name=='userinfoUrl')     return 'https://test.gsis.gr/oauth2server/userinfo';
+    if($url_name=='authorizeUrl')    return 'https://test.gsis.gr/oauth2server/oauth/authorize';
+    if($url_name=='redirectUri')     return 'http://forms2.minedu.gov.gr/formspde/gsis';
+	*/
  	return $wanted_url;
  }
 
