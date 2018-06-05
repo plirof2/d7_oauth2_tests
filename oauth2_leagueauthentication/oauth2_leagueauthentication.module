@@ -7,10 +7,38 @@ use GuzzleHttp\Client;
 http://localhost:8282/o/oauth2/v2/auth            ?client_id=dummy-client-id&redirect_uri=http%3A%2F%2Flocalhost%2Fformspde-test%2Foauth2callback &response_type=code&state=483caffb45b611f58fc9ee6e03743b4a
 https://test.gsis.gr/oauth2server/oauth/authorize ?client_id=AAAAAAAA       &redirect_uri=http://forms2.minedu.gov.gr/gsis                       &response_type=code&state=_gsis_6857058725b0fadf00e4d1&scope=read
 
-
+REmote logout  https://test.gsis.gr/oauth2server /logout/{clientId_δικό μας}/?url=https://eduslim1.minedu.gov.gr/laravel/logout.htm
 
 http://forms2.minedu.gov.gr/formspde/gsis?code=t8229A&state=_gsis_6857058725b0fadf00e4d1
  */
+
+
+
+ function oauth2_getUrl($url_name){
+ 	$wanter_url="";
+ 	if($url_name=='tokenUrl')     	return 'http://localhost:8282/oauth2/v4/token';
+    if($url_name=='userinfoUrl')     return 'http://localhost:8282/oauth2/v3/userinfo';
+    if($url_name=='authorizeUrl')    return 'http://localhost:8282/o/oauth2/v2/auth';
+    if($url_name=='redirectUri')     return 'http://localhost/formspde-test/gsis_callback';
+
+ 	return $wanted_url;
+ }
+
+ function oauth2_getConData($code){
+
+    $data = [
+          'code' => $code,
+          'redirect_uri' => oauth2_getUrl('redirectUri'),
+          'client_id' => 'dummy-client-id',
+          'client_secret' => 'dummy-client-secret',
+          'scope' => '',
+          'grant_type' => 'authorization_code',
+    ];
+
+
+ 	return $data;
+ }
+
 
 /****************************************************************************
  * Drupal Core Hooks
@@ -39,6 +67,14 @@ function oauth2_leagueauthentication_menu() {
     'access callback' => 'user_is_anonymous',
     'type' => MENU_SUGGESTED_ITEM,
   );
+
+  $items['oauth2leaguelogout'] = array(
+    'path' => 'gsis_logout_callback',
+    'title' => 'AAAACAS Login',
+    'page callback' => 'oauth2_gsis_remote_logout',
+    'access callback' => 'user_is_anonymous',
+    'type' => MENU_SUGGESTED_ITEM,
+  );  
 /*
   $items['oauth2callback'] = array(
     'path' => 'oauth2callback',
@@ -200,12 +236,43 @@ function oauth2_leagueauthentication_form_user_login_block_alter(&$form, &$form_
  * want these to be used by a different user that logs in sometime between now
  * and the existing token's expiration time.
  */
-function oauth2_leagueauthentication_user_logout($account) {
+//function oauth2_leagueauthentication_user_logout($account) {
+function oauth2_gsis_remote_logout($account) {  // got here from  /gsis_logout_callback
 
   // As using unset() on a global variable may not always unset it outside of
   // the current scope, simply drop any OAuth2 tokens by assigning an empty
   // list.
-  $_SESSION['oauth2_client'] = array();
+  //$_SESSION['oauth2_client'] = array();
+  global $user;
+  // Override the global user.
+  $user = user_load($account->uid);
+  $login_array = array('name' => $account->name);
+  //$form_state['redirect'] = 'user/' . $user->uid;  //REDIRECT does NOT work...
+  drupal_set_message ("223 gsis_logout_callback REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
+  if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto($_SESSION['GSIS-session-last-webform-url']);
+
+
+}
+
+//function oauth2_leagueauthentication_user_logout($account) {
+function oauth2_init_remote_logout() { 
+
+  // As using unset() on a global variable may not always unset it outside of
+  // the current scope, simply drop any OAuth2 tokens by assigning an empty
+  // list.
+  //$_SESSION['oauth2_client'] = array();
+  //global $user;
+  // Override the global user.
+  //$user = user_load($account->uid);
+  //$login_array = array('name' => $account->name);
+  //$form_state['redirect'] = 'user/' . $user->uid;  //REDIRECT does NOT work...
+  drupal_set_message ("241 oauth2_init_remote_logout REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
+  //if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto($_SESSION['GSIS-session-last-webform-url']);
+  $getlogouturl='https://test.gsis.gr/oauth2server/logout/'.oauth2_getConData()['client_id'].'/?url=https://localhost/formspde-test/gsis_logout_callback';
+  //$getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
+  drupal_goto($getlogouturl); //redirect to Oauth2 server
+
+
 }
 
 /****************************************************************************
@@ -331,7 +398,7 @@ function taxis_loginUserLocally($account)
     $user = user_load($account->uid);
     $login_array = array('name' => $account->name);
     //$form_state['redirect'] = 'user/' . $user->uid;  //REDIRECT does NOT work...
-    drupal_set_message ("334 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
+    drupal_set_message ("399 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
     if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto($_SESSION['GSIS-session-last-webform-url']);
     //if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto('node/4');
     user_login_finalize($login_array);
@@ -582,7 +649,7 @@ function oauth2league_login_page() {
 
   echo "<h1>INSIDE START A1 oauth2league_login_page</h1>";
 
-  require_once('./vendor/autoload.php');
+  require_once('./vendor/autoload.php'); //needed for Guzzle
   ///session_start();
 
   $tag = "_gsis_";
@@ -604,10 +671,13 @@ function oauth2league_login_page() {
 
 
 
-      $tokenUrl     = 'http://localhost:8282/oauth2/v4/token';
-      $userinfoUrl  = 'http://localhost:8282/oauth2/v3/userinfo';
-      $authorizeUrl = 'http://localhost:8282/o/oauth2/v2/auth';
-      $redirectUri  = 'http://localhost/formspde-test/gsis_callback';
+      $tokenUrl     = oauth2_getUrl('tokenUrl');//'http://localhost:8282/oauth2/v4/token';
+      $userinfoUrl  = oauth2_getUrl('userinfoUrl');//'http://localhost:8282/oauth2/v3/userinfo';
+      $authorizeUrl = oauth2_getUrl('authorizeUrl');//'http://localhost:8282/o/oauth2/v2/auth';
+      $redirectUri  = oauth2_getUrl('redirectUri');//'http://localhost/formspde-test/gsis_callback';
+      drupal_set_message ("676 URLKs= ".$tokenUrl.$userinfoUrl.$authorizeUrl.$redirectUri );
+
+
 /*
       'token_endpoint' => 'http://localhost:8282/oauth2/v4/token',// variable_get('oauth2_authentication_token_endpoint', ''),
       'auth_flow' => 'server-side',
@@ -619,7 +689,7 @@ function oauth2league_login_page() {
   */    
 
 
-    // step2 success get token with code.
+    // step 2 success get token with code.
     if (NULL !== $_REQUEST['code']) {
       echo "<h1>INSIDE START A1 step2 oauth2league_login_page</h1>";
       $code = $_REQUEST['code'];
@@ -629,14 +699,7 @@ function oauth2league_login_page() {
 
       //try {
         $gettokenurl = $tokenUrl;
-        $data = [
-          'code' => $code,
-          'redirect_uri' => $redirectUri,
-          'client_id' => 'dummy-client-id',
-          'client_secret' => 'dummy-client-secret',
-          'scope' => '',
-          'grant_type' => 'authorization_code',
-        ];
+        $data=oauth2_getConData($code);
 
         $body = http_build_query($data);
         $httpClient = new \GuzzleHttp\Client;
@@ -703,7 +766,7 @@ function oauth2league_login_page() {
         $fathername = $xml->userinfo['fathername'][0]->__toString();
         $mothername = $xml->userinfo['mothername'][0]->__toString();
         $birthyear = $xml->userinfo['birthyear'][0]->__toString();
-        drupal_set_message ("704 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
+        drupal_set_message ("767 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
 
         // Set session variables so we can use them from oauth2_taxis_tokens module
         if($taxid!=NULL && !isset($_SESSION['GSIS-session-afm']))
@@ -755,9 +818,10 @@ function oauth2league_login_page() {
     echo "<h1>INSIDE START A3  step 1 oauth2league_login_page</h1>";
     $_SESSION['gsis_state'] = "_gsis_";
 //    $_SESSION['GSIS-session-last-webform-url'] = request_path();
-    drupal_set_message ("756 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
+    
 
-        $getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
+        $getauthurl=$authorizeUrl . '?client_id='.oauth2_getConData('')['client_id']. '&redirect_uri=' . oauth2_getUrl('redirectUri')  . '&response_type=code&scope=read&state=' . "_gsis_";
+        drupal_set_message ("819 REDIRECTING  $getauthurl to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']  . oauth2_getUrl('redirectUri') );
         drupal_goto($getauthurl); //redirect to Oauth2 server
         /*
         $userxml = $http->get(
