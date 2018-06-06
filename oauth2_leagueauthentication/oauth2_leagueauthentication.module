@@ -301,7 +301,7 @@ function oauth2_init_remote_logout() {
   //$getlogouturl='https://test.gsis.gr/oauth2server/logout/'.oauth2_getConData('')['client_id'].'/?url=https://localhost/formspde-test/gsis_logout_callback?url_redirect='.$url_callback;
    //$getlogouturl='https://test.gsis.gr/oauth2server/logout/'.oauth2_getConData('')['client_id'].'/?url=http://forms2.minedu.gov.gr/formspde/gsis_logout_callback';
   $encoded_url=urlencode('http://forms2.minedu.gov.gr/formspde/gsis_logout_callback?return_path='.$_SESSION['GSIS-session-last-webform-url']);
-   $getlogouturl=oauth2_getUrl('logoutRemoteUrl').oauth2_getConData('')['client_id'].'/?url='.$encoded_url;
+  $getlogouturl=oauth2_getUrl('logoutRemoteUrl').oauth2_getConData('')['client_id'].'/?url='.$encoded_url;
   //$getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
   drupal_goto($getlogouturl); //redirect to Oauth2 server
 
