@@ -89,15 +89,15 @@ function oauth2_gsis_menu() {
   );
   */
 
-  $items['oauth2leagueconnect'] = array(
+  $items['oauth2gsisconnect'] = array(
     'path' => 'gsis',
     'title' => 'AAAACAS Login',
-    'page callback' => 'oauth2league_login_page',
+    'page callback' => 'oauth2gsis_login_page',
     'access callback' => 'user_is_anonymous',
     'type' => MENU_SUGGESTED_ITEM,
   );
 
-  $items['oauth2leaguelogout'] = array(
+  $items['oauth2gsislogout'] = array(
     'path' => 'gsis_logout_callback',
     'title' => 'AAAACAS Login',
     'page callback' => 'oauth2_gsis_remote_logout',
@@ -685,9 +685,9 @@ function oauth2_gsis_init() {
  * @return
  *   TRUE if we should require the user be authenticated, FALSE otherwise.
  */
-function oauth2league_login_page() {
+function oauth2gsis_login_page() {
 
-  //drupal_set_message("<h1>INSIDE START A1 oauth2league_login_page</h1>");
+  //drupal_set_message("<h1>INSIDE START A1 oauth2gsis_login_page</h1>");
   //drupal_set_message(json_encode($_REQUEST));
   require_once('./vendor/autoload.php'); //needed for Guzzle
   ///session_start();
@@ -731,14 +731,14 @@ function oauth2league_login_page() {
 
     // step 2 success get token with code.
     if (NULL !== $_REQUEST['code']) {
-      //echo "<h1>INSIDE START A1 step2 oauth2league_login_page</h1>";
+      //echo "<h1>INSIDE START A1 step2 oauth2gsis_login_page</h1>";
       $code = $_REQUEST['code'];
       $state = $_REQUEST['state'];
       /*
       if($state=="_gsis_") {
       	// This is for the LOGOUT part...
       	//oauth2_gsis_remote_logout();
-      	drupal_set_message ("713 gsis_logout_callback oauth2league_login_page REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
+      	drupal_set_message ("713 gsis_logout_callback oauth2gsis_login_page REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
   		//if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto($_SESSION['GSIS-session-last-webform-url']);
       	//return ['#markup' => t("Hello WORLS state=_gsis_")];
 
@@ -780,7 +780,7 @@ function oauth2league_login_page() {
       */
       // step3.
       try {
-        //echo "<h1>INSIDE START A2  step 3 oauth2league_login_page</h1>";
+        //echo "<h1>INSIDE START A2  step 3 oauth2gsis_login_page</h1>";
         // TODO check fields.'&fields=id,name,emails';.
         //drupal_set_message ("671 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
         $getuserurl = $userinfoUrl . "?format=xml&access_token=" . $tokenarray['access_token'];
@@ -831,7 +831,7 @@ function oauth2league_login_page() {
         }
 
 
-        //echo "<h1>INSIDE START A2  step 3b oauth2league_login_page</h1>";
+        //echo "<h1>INSIDE START A2  step 3b oauth2gsis_login_page</h1>";
 
         $userDetails = [
           "userid" => $userid,
@@ -867,7 +867,7 @@ function oauth2league_login_page() {
 
 
     // Step 1.
-    //echo "<h1>INSIDE START A3  step 1 oauth2league_login_page</h1>";
+    //echo "<h1>INSIDE START A3  step 1 oauth2gsis_login_page</h1>";
     $_SESSION['gsis_state'] = "_gsis_";
 //    $_SESSION['GSIS-session-last-webform-url'] = request_path();
     
