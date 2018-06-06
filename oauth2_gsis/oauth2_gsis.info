@@ -1,5 +1,5 @@
-name = oauth2_leagueauthentication
-description =oauth2_leagueauthentication  Authenticates Drupal users via OAuth2
+name = oauth2_gsis
+description =oauth2_gsis  Authenticates Drupal users via OAuth2
 core = 7.x
 package = OAuth2
 
@@ -15,6 +15,6 @@ dependencies[] = oauth2_taxis_tokens
 ; Information added by Drupal.org packaging script on 2015-01-22
 version = "7.x-1.0+1-dev"
 core = "7.x"
-project = "oauth2_leagueauthentication"
+project = "oauth2_gsis"
 datestamp = "1421965382"
 

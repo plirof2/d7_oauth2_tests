@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Installation file for the OAuth2 Authentication module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function oauth2_gsis_uninstall() {
+
+  /*
+  // Delete the configuration.
+  variable_del('oauth2_gsis_token_endpoint');
+  variable_del('oauth2_gsis_client_id');
+  variable_del('oauth2_gsis_client_secret');
+  variable_del('oauth2_gsis_scope');
+  variable_del('oauth2_gsis_class');
+  variable_del('oauth2_gsis_user_edit_email');
+  variable_del('oauth2_gsis_user_edit_password');
+  */
+}

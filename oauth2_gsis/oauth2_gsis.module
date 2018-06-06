@@ -76,16 +76,16 @@ function oauth2_getConData($code){
 /**
  * Implements hook_menu().
  */
-function oauth2_leagueauthentication_menu() {
+function oauth2_gsis_menu() {
   $items = array();
   /*
-  $items['admin/config/services/oauth2_leagueauthentication'] = array(
+  $items['admin/config/services/oauth2_gsis'] = array(
     'title' => 'OAuth2 Authentication',
     'description' => 'Configure OAuth2 Authentication parameters.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('oauth2_leagueauthentication_admin_form'),
+    'page arguments' => array('oauth2_gsis_admin_form'),
     'access arguments' => array('administer oauth2 authentication'),
-    'file' => 'includes/oauth2_leagueauthentication.admin.inc',
+    'file' => 'includes/oauth2_gsis.admin.inc',
   );
   */
 
@@ -121,7 +121,7 @@ function oauth2_leagueauthentication_menu() {
 /**
  * Implements hook_permission().
  */
-function oauth2_leagueauthentication_permission() {
+function oauth2_gsis_permission() {
   return array(
     'administer oauth2 authentication' => array(
       'title' => t('Administer authentication parameters'),
@@ -136,7 +136,7 @@ function oauth2_leagueauthentication_permission() {
  * Alter some core menu functionality to potentially disable some items.
  */
 /*
-function oauth2_leagueauthentication_menu_alter(&$items) {
+function oauth2_gsis_menu_alter(&$items) {
   global $user, $language;
 
   // Set the path for password resets.
@@ -144,7 +144,7 @@ function oauth2_leagueauthentication_menu_alter(&$items) {
 
   // Restrict the password reset page to user administrators if password editing
   // is disabled.
-  if ((!variable_get('oauth2_leagueauthentication_user_edit_password', FALSE)) &&
+  if ((!variable_get('oauth2_gsis_user_edit_password', FALSE)) &&
       ($user->uid != 1)) {
     $items[$path]['access callback'] = 'user_access';
     $items[$path]['access arguments'] = array('administer users');
@@ -175,21 +175,21 @@ function oauth2_leagueauthentication_menu_alter(&$items) {
  * create it.
  */
 /*
-function oauth2_leagueauthentication_form_user_login_alter(&$form, &$form_state, $form_id) {
+function oauth2_gsis_form_user_login_alter(&$form, &$form_state, $form_id) {
 
   // Replace the user_login_authenticate_validate() call with our own
-  // oauth2_leagueauthentication_login_authenticate_validate() function.
+  // oauth2_gsis_login_authenticate_validate() function.
   if ($form_id == 'user_login_block' || $form_id == 'user_login') {
-    drupal_set_message("AAAAA oauth2_leagueauthentication_form_user_login_alter");
+    drupal_set_message("AAAAA oauth2_gsis_form_user_login_alter");
     // …
   }
-drupal_set_message( "FORM LOGIN helloooo oauth2_leagueauthentication_form_user_login_alter");
+drupal_set_message( "FORM LOGIN helloooo oauth2_gsis_form_user_login_alter");
 //$my_url='http://localhost:8282/o/oauth2/v2/auth?client_id=dummy-client-id&redirect_uri=http://localhost/drupal84/gsis&response_type=code&scope=read&state=_gsis_20924727255b0d0195aa34b ';
 
   
   if (in_array('user_login_authenticate_validate', $form['#validate'])) {
     $key = array_search('user_login_authenticate_validate', $form['#validate']);
-    $form['#validate'][$key] = 'oauth2_leagueauthentication_login_authenticate_validate';
+    $form['#validate'][$key] = 'oauth2_gsis_login_authenticate_validate';
   }
   
 }
@@ -198,13 +198,13 @@ drupal_set_message( "FORM LOGIN helloooo oauth2_leagueauthentication_form_user_l
  * Implements hook_form_FORM_ID_alter() for the user_login_block form.
  */
 /*
-function oauth2_leagueauthentication_form_user_login_block_alter(&$form, &$form_state, $form_id) {
+function oauth2_gsis_form_user_login_block_alter(&$form, &$form_state, $form_id) {
   global $user;
-  drupal_set_message( "LOGIN BLOCK helloooo  oauth2_leagueauthentication_form_user_login_block_alter");
+  drupal_set_message( "LOGIN BLOCK helloooo  oauth2_gsis_form_user_login_block_alter");
 
   // Make the same changes as we're making to the standard login form.  See
-  // oauth2_leagueauthentication_form_user_login_alter() for details.
-  oauth2_leagueauthentication_form_user_login_alter($form, $form_state, $form_id);
+  // oauth2_gsis_form_user_login_alter() for details.
+  oauth2_gsis_form_user_login_alter($form, $form_state, $form_id);
 
   // Disable password-reset links if applicable.
 
@@ -220,9 +220,9 @@ function oauth2_leagueauthentication_form_user_login_block_alter(&$form, &$form_
  * which fields are to enabled or disabled, go to the module configuration page.
  * By default, they are all disabled.
  */
-//function oauth2_leagueauthentication_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
+//function oauth2_gsis_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
 //  global $user;
-//  drupal_set_message( "PROFILE FORM ALTER helloooo  oauth2_leagueauthentication_form_user_profile_form_alte");
+//  drupal_set_message( "PROFILE FORM ALTER helloooo  oauth2_gsis_form_user_profile_form_alte");
 /*
   // We want to keep user fields editable for user administrators so exit if the
   // current user is one of them.
@@ -231,8 +231,8 @@ function oauth2_leagueauthentication_form_user_login_block_alter(&$form, &$form_
   }
 
   // Get configuration info on which user attributes are not to be edited.
-  $disable_email = !variable_get('oauth2_leagueauthentication_user_edit_email', FALSE);
-  $disable_password_change = !variable_get('oauth2_leagueauthentication_user_edit_password', FALSE);
+  $disable_email = !variable_get('oauth2_gsis_user_edit_email', FALSE);
+  $disable_password_change = !variable_get('oauth2_gsis_user_edit_password', FALSE);
 
   // Disable the current password field if neither the e-mail nor the password
   // fields are editable.  It's only needed if one wishes to edit either of
@@ -265,7 +265,7 @@ function oauth2_leagueauthentication_form_user_login_block_alter(&$form, &$form_
  * want these to be used by a different user that logs in sometime between now
  * and the existing token's expiration time.
  */
-//function oauth2_leagueauthentication_user_logout($account) {
+//function oauth2_gsis_user_logout($account) {
 function oauth2_gsis_remote_logout() {  // got here from  /gsis_logout_callback
 
   // As using unset() on a global variable may not always unset it outside of
@@ -285,7 +285,7 @@ function oauth2_gsis_remote_logout() {  // got here from  /gsis_logout_callback
 
 }
 
-//function oauth2_leagueauthentication_user_logout($account) {
+//function oauth2_gsis_user_logout($account) {
 function oauth2_init_remote_logout() { 
 
   // As using unset() on a global variable may not always unset it outside of
@@ -324,7 +324,7 @@ function oauth2_init_remote_logout() {
  * like to change as that's the function call we actually care about.
  */
 /*
-function oauth2_leagueauthentication_login_authenticate_validate($form, &$form_state) {
+function oauth2_gsis_login_authenticate_validate($form, &$form_state) {
   $password = trim($form_state['values']['pass']);
   if (!empty($form_state['values']['name']) && !empty($password)) {
     // Do not allow any login from the current user's IP if the limit has been
@@ -361,7 +361,7 @@ function oauth2_leagueauthentication_login_authenticate_validate($form, &$form_s
 
     // We are not limited by flood control, so try to authenticate.
     // Set $form_state['uid'] as a flag for user_login_final_validate().
-    $form_state['uid'] = oauth2_leagueauthentication_authenticate($form_state['values']['name'], $password);
+    $form_state['uid'] = oauth2_gsis_authenticate($form_state['values']['name'], $password);
   }
 }
 */
@@ -380,8 +380,8 @@ function oauth2_leagueauthentication_login_authenticate_validate($form, &$form_s
  * @return
  *   The user's uid on success, or FALSE on failure to authenticate.
  */
-function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOULD maybe renamed to not being hook
-    //echo "<h1>INSIDE B1a oauth2_leagueauthentication_authenticate </h1>";
+function oauth2_gsis_authenticate($name, $access_token) { //SHOULD maybe renamed to not being hook
+    //echo "<h1>INSIDE B1a oauth2_gsis_authenticate </h1>";
   // Assume the user is invalid until we determine otherwise.
   $uid = FALSE;
   $password="dummy pass";
@@ -392,29 +392,29 @@ function oauth2_leagueauthentication_authenticate($name, $access_token) { //SHOU
     $account = user_load_by_name($name);
 
     // Instantiate an OAuth2 Authentication class with the credentials.
-    //$class = variable_get('oauth2_leagueauthentication_class', 'OAuth2AuthenticationClient');
+    //$class = variable_get('oauth2_gsis_class', 'OAuth2AuthenticationClient');
     //$client = new $class($name, $password);
 
     // If the load was successful, we can see if the entered password is valid.
     if ($account) {
-      //echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate USER EXISTS lets auto log him</h1>";
+      //echo "<h1>INSIDE B1b oauth2_gsis_authenticate USER EXISTS lets auto log him</h1>";
 
       taxis_loginUserLocally($account);
 
-      echo "<h1>INSIDE oauth2_leagueauthentication_authenticate We should be LOGGED in By Now </h1>";
+      echo "<h1>INSIDE oauth2_gsis_authenticate We should be LOGGED in By Now </h1>";
       // Allow alternate password hashing schemes in checking the password.
     }
 
     else /* there is no local user account */ {
-      //drupal_set_message("oauth2_leagueauthentication_authenticate NO account , NO LOCAL USER");
+      //drupal_set_message("oauth2_gsis_authenticate NO account , NO LOCAL USER");
       // Instantiate an OAuth2 Authentication class with the credentials.
-      echo "<h1>oauth2_leagueauthentication_authenticate NO account , NO LOCAL USER</h1>";
-      //$class = variable_get('oauth2_leagueauthentication_class', 'OAuth2AuthenticationClient');
+      echo "<h1>oauth2_gsis_authenticate NO account , NO LOCAL USER</h1>";
+      //$class = variable_get('oauth2_gsis_class', 'OAuth2AuthenticationClient');
       //$client = new $class($name, $password);
       
       // Check if the user exists remotely.
       if (isset($access_token)) {
-        echo "<h1>INSIDE B1b oauth2_leagueauthentication_authenticate NO LOCAL USER</h1>";
+        echo "<h1>INSIDE B1b oauth2_gsis_authenticate NO LOCAL USER</h1>";
         // We're dealing with a valid remote user so create it locally.
         //$uid = $this->createUserLocally()->uid;//ORIG
         $uid = oauth2_createUserLocally($name);//ORIG
@@ -588,8 +588,8 @@ function taxis_user_register($cas_name, $options = array()) {
 /**
  * Implements hook_block_info().
  */
-function oauth2_leagueauthentication_block_info() {
-  $blocks['login']['info'] = t('oauth2_leagueauthentication login (block name)');
+function oauth2_gsis_block_info() {
+  $blocks['login']['info'] = t('oauth2_gsis login (block name)');
   // Not worth caching.
   $blocks['login']['cache'] = DRUPAL_NO_CACHE;
 
@@ -599,7 +599,7 @@ function oauth2_leagueauthentication_block_info() {
 /**
  * Implements hook_block_view().
  */
-function oauth2_leagueauthentication_block_view($delta = '') {
+function oauth2_gsis_block_view($delta = '') {
   global $user;
 
   $block = array();
@@ -609,7 +609,7 @@ function oauth2_leagueauthentication_block_view($delta = '') {
       // For usability's sake, avoid showing two login forms on one page.
       if (!$user->uid && !(arg(0) == 'user' && !is_numeric(arg(1)))) {
         $block['subject'] = t('User login');
-        $block['content'] = drupal_get_form('oauth2_leagueauthentication_login_block');
+        $block['content'] = drupal_get_form('oauth2_gsis_login_block');
       }
       return $block;
   }
@@ -618,32 +618,32 @@ function oauth2_leagueauthentication_block_view($delta = '') {
 /**
  * Login form for the CAS login block.
  */
-function oauth2_leagueauthentication_login_block($form) {
+function oauth2_gsis_login_block($form) {
 
     // Instantiate an OAuth2 Authentication class with the credentials.
-    //$class = variable_get('oauth2_leagueauthentication_class', 'OAuth2AuthenticationClient');
+    //$class = variable_get('oauth2_gsis_class', 'OAuth2AuthenticationClient');
     //$client = new $class($name, $password);
   //echo "<h3>CURRENT PATH =". request_path()."</h3>";
   //$form['#action'] = url('cas', array('query' => drupal_get_destination()));
   //$form['#action'] = url('oauth2/authorized', array('query' => drupal_get_destination()));// Call A ROUTE that CALLS taxis
-	$arr01=array("1"=>"oauth2_leagueauthentication_login_block");
+	$arr01=array("1"=>"oauth2_gsis_login_block");
 	$arr01["my_current_path"]=request_path();
 	$form['#action'] = url('gsis', $arr01);// Call A ROUTE that CALLS taxis
 
-  $form['#id'] = 'oauth2_leagueauthentication-login-form';
+  $form['#id'] = 'oauth2_gsis-login-form';
   session_start();
   $_SESSION['GSIS-session-last-webform-url'] = request_path(); // Store path in session to redirect after login
-  $form['oauth2_leagueauthentication_login_redirection_message'] = array(
+  $form['oauth2_gsis_login_redirection_message'] = array(
     '#type' => 'item',
-    //'#markup' => t(variable_get('oauth2_leagueauthentication_login_redir_message', "oauth2_leagueauthentication_LOGIN_REDIR_MESSAGE")),
-    '#markup' => t(variable_get('oauth2_leagueauthentication_login_redir_message', "|----|")),
+    //'#markup' => t(variable_get('oauth2_gsis_login_redir_message', "oauth2_gsis_LOGIN_REDIR_MESSAGE")),
+    '#markup' => t(variable_get('oauth2_gsis_login_redir_message', "|----|")),
     '#weight' => -1,
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    //'#value' => t(variable_get('oauth2_leagueauthentication_login_invite', "oauth2_leagueauthentication_LOGIN_INVITE_DEFAULT")),
-    '#value' => t(variable_get('oauth2_leagueauthentication_login_invite', "Login Using GSIS")),
+    //'#value' => t(variable_get('oauth2_gsis_login_invite', "oauth2_gsis_LOGIN_INVITE_DEFAULT")),
+    '#value' => t(variable_get('oauth2_gsis_login_invite', "Login Using GSIS")),
   );
 
   return $form;
@@ -657,7 +657,7 @@ function oauth2_leagueauthentication_login_block($form) {
  * Traps a page load to see if authentication is required.
  */
 /*
-function oauth2_leagueauthentication_init() {
+function oauth2_gsis_init() {
   global $user;
 
   // Process a single-sign out request.
@@ -846,7 +846,7 @@ function oauth2league_login_page() {
         //print_r($userDetails);
 
         //var_dump($userDetails);
-        oauth2_leagueauthentication_authenticate($userid,$tokenarray['access_token']);  // Need to replace Class file
+        oauth2_gsis_authenticate($userid,$tokenarray['access_token']);  // Need to replace Class file
         return array('#markup'=>arg(0).arg(1).'GSIS CALLBACK Now we should create a USER and then Logout from GSIS');
         ////$this->createUser($userDetails);
         
