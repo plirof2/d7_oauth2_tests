@@ -25,7 +25,7 @@ function oauth2_getUrl($url_name){
     if($url_name=='logoutRemoteUrl')    return 'http://localhost:8282/oauth2server/logout/';
 
     if($url_name=='redirectUri')     	return 'http://localhost/formspde-test/gsis';
-
+    if($url_name=='redirectLogoutCallbackUri')      return 'http://localhost/formspde-test/gsis_logout_callback';
     	
 	
 	/*
@@ -36,6 +36,7 @@ function oauth2_getUrl($url_name){
     if($url_name=='logoutRemoteUrl')    return 'https://test.gsis.gr/oauth2server/logout/';
 
     if($url_name=='redirectUri')     return 'http://forms2.minedu.gov.gr/formspde/gsis';
+    if($url_name=='redirectLogoutCallbackUri')      return 'http://forms2.minedu.gov.gr/formspde/gsis_logout_callback';
 	*/
  	return $wanted_url;
 }
@@ -300,7 +301,10 @@ function oauth2_init_remote_logout() {
   //if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto($_SESSION['GSIS-session-last-webform-url']);
   //$getlogouturl='https://test.gsis.gr/oauth2server/logout/'.oauth2_getConData('')['client_id'].'/?url=https://localhost/formspde-test/gsis_logout_callback?url_redirect='.$url_callback;
    //$getlogouturl='https://test.gsis.gr/oauth2server/logout/'.oauth2_getConData('')['client_id'].'/?url=http://forms2.minedu.gov.gr/formspde/gsis_logout_callback';
-  $encoded_url=urlencode('http://forms2.minedu.gov.gr/formspde/gsis_logout_callback?return_path='.$_SESSION['GSIS-session-last-webform-url']);
+  //$encoded_url=urlencode('http://forms2.minedu.gov.gr/formspde/gsis_logout_callback?return_path='.$_SESSION['GSIS-session-last-webform-url']);
+  //////$encoded_url=urlencode(oauth2_getUrl('redirectLogoutCallbackUri')+'?return_path='.$_SESSION['GSIS-session-last-webform-url']);
+  drupal_set_message(oauth2_getUrl('redirectLogoutCallbackUri') .$encoded_url);
+  $encoded_url=urlencode('http://localhost/formspde-test/gsis_logout_callback?return_path='.$_SESSION['GSIS-session-last-webform-url']);
   $getlogouturl=oauth2_getUrl('logoutRemoteUrl').oauth2_getConData('')['client_id'].'/?url='.$encoded_url;
   //$getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
   drupal_goto($getlogouturl); //redirect to Oauth2 server
