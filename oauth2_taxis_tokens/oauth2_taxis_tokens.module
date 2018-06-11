@@ -8,125 +8,139 @@
 /**
 * Implements hook_token_info().
 * You first of all have to define your token in the hook_token_info(): -
-  See more at: http://www.whenwhowhere.com/tech-blog/create-custom-token-drupal-7#sthash.6IQaG7A5.dpuf
-If you define your token in ['tokens']['user'] like I did it will appear in the available tokens under user
-but you can change it to another option, in my case this is what made most sense.
-This will apply for all token lists which can retrieve user information,
-
-
-* 
+* See more at: http://www.whenwhowhere.com/tech-blog/create-custom-token-drupal-7#sthash.6IQaG7A5.dpuf
+* If you define your token in ['tokens']['user'] like I did it will appear in the available tokens under user
+* but you can change it to another option, in my case this is what made most sense.
+* This will apply for all token lists which can retrieve user information,
+*
 */
-function oauth2_taxis_tokens_token_info() { 
-  $info['tokens']['user']['GSIS-taxis-afm'] = array(
+function oauth2_taxis_tokens_token_info()
+{
+    $info['tokens']['user']['GSIS-taxis-afm'] = array(
   //$info['tokens']['dummy'] = array(
     'name' => t('GSIS-taxis-afm user'),
     'description' => t('current-user Returns the afm item)'),
   );
-  $info['tokens']['user']['GSIS-taxis-username'] = array(
+    $info['tokens']['user']['GSIS-taxis-username'] = array(
   //$info['tokens']['dummy'] = array(
     'name' => t('GSIS-taxis-username'),
     'description' => t('current-user Returns the Username item)'),
-  );  
-  $info['tokens']['user']['GSIS-taxis-firstname'] = array(
+  );
+    $info['tokens']['user']['GSIS-taxis-firstname'] = array(
   //$info['tokens']['dummy'] = array(
     'name' => t('GSIS-taxis-firstname'),
     'description' => t('current-user Returns the first name item)'),
-  );  
-  $info['tokens']['user']['GSIS-taxis-lastname'] = array(
+  );
+    $info['tokens']['user']['GSIS-taxis-lastname'] = array(
   //$info['tokens']['dummy'] = array(
     'name' => t('GSIS-taxis-lastname'),
     'description' => t('current-user Returns the lastname item)'),
-  );  
-  $info['tokens']['user']['GSIS-taxis-fathername'] = array(
+  );
+    $info['tokens']['user']['GSIS-taxis-fathername'] = array(
   //$info['tokens']['dummy'] = array(
     'name' => t('GSIS-taxis-fathername'),
     'description' => t('current-user Returns the fathername item)'),
-  );  
-  $info['tokens']['user']['GSIS-taxis-mothername'] = array(
+  );
+    $info['tokens']['user']['GSIS-taxis-mothername'] = array(
   //$info['tokens']['dummy'] = array(
     'name' => t('GSIS-taxis-mothername'),
     'description' => t('current-user Returns the mothername item)'),
-  );  
-  $info['tokens']['user']['GSIS-taxis-birthyear'] = array(
+  );
+    $info['tokens']['user']['GSIS-taxis-birthyear'] = array(
   //$info['tokens']['dummy'] = array(
     'name' => t('GSIS-taxis-birthyear'),
     'description' => t('current-user Returns the birthyaer item)'),
-  ); 
+  );
 
-  return $info;
+    return $info;
 }
 
 
 /* Now we need to actually return the contents (or replacement value) of this token and
  * this is done in the hook_tokens():
 */
- 
+
 /**
 * Implements hook_tokens().
 */
-function oauth2_taxis_tokens_tokens($type, $tokens, array $data = array(), array $options = array()) {
- $replacements = array();   
-   
-   if ($type == 'current-user' ) {   
-     foreach ($tokens as $name => $original) {     
-      switch ($name) {
-        case 'GSIS-taxis-afm':
-          $name=$_SESSION['GSIS-session-afm'];
-          if($name==null)$name = 'GSIS-taxis value NOT set-afm';
-          $replacements[$original] = $name ;//"aaaaa ORIGINAL gsis AFM ,orig=".$original;
-          break;
-        case 'GSIS-taxis-username':
-          $name=$_SESSION['GSIS-session-username'];
-          if($name==null)$name = 'GSIS-taxis value NOT set-username';
-          $replacements[$original] = $name;
-          break;
-        case 'GSIS-taxis-firstname':
-          $name=$_SESSION['GSIS-session-firstname'];
-          if($name==null)$name = 'GSIS-taxis value NOT set-firstname';
-          $replacements[$original] = $name;
-          break;                    
-        case 'GSIS-taxis-lastname':
-          $name=$_SESSION['GSIS-session-lastname'];
-          if($name==null)$name = 'GSIS-taxis value NOT set-lastname';
-          $replacements[$original] = $name;
-          break;
-        case 'GSIS-taxis-fathername':
-          $name=$_SESSION['GSIS-session-fathername'];
-          if($name==null)$name = 'GSIS-taxis value NOT set-fathername';
-          $replacements[$original] = $name;
-          break;
-        case 'GSIS-taxis-mothername':
-          $name=$_SESSION['GSIS-session-mothername'];
-          if($name==null)$name = 'GSIS-taxis value NOT set-mothername';
-          $replacements[$original] = $name;
-          break;
-        case 'GSIS-taxis-birthyear':
-          $name=$_SESSION['GSIS-session-birthyear'];
-          if($name==null)$name = 'GSIS-taxis value NOT set-birthyear';
-          $replacements[$original] = $name;
-          break;          
+function oauth2_taxis_tokens_tokens($type, $tokens, array $data = array(), array $options = array())
+{
+    $replacements = array();
 
-      }
-     }
+    if ($type == 'current-user') {
+        foreach ($tokens as $name => $original) {
+            switch ($name) {
+            case 'GSIS-taxis-afm':
+              $name=$_SESSION['GSIS-session-afm'];
+              if ($name==null) {
+                  $name = 'GSIS-taxis value NOT set-afm';
+              }
+              $replacements[$original] = $name ;//"aaaaa ORIGINAL gsis AFM ,orig=".$original;
+              break;
+            case 'GSIS-taxis-username':
+              $name=$_SESSION['GSIS-session-username'];
+              if ($name==null) {
+                  $name = 'GSIS-taxis value NOT set-username';
+              }
+              $replacements[$original] = $name;
+              break;
+            case 'GSIS-taxis-firstname':
+              $name=$_SESSION['GSIS-session-firstname'];
+              if ($name==null) {
+                  $name = 'GSIS-taxis value NOT set-firstname';
+              }
+              $replacements[$original] = $name;
+              break;
+            case 'GSIS-taxis-lastname':
+              $name=$_SESSION['GSIS-session-lastname'];
+              if ($name==null) {
+                  $name = 'GSIS-taxis value NOT set-lastname';
+              }
+              $replacements[$original] = $name;
+              break;
+            case 'GSIS-taxis-fathername':
+              $name=$_SESSION['GSIS-session-fathername'];
+              if ($name==null) {
+                  $name = 'GSIS-taxis value NOT set-fathername';
+              }
+              $replacements[$original] = $name;
+              break;
+            case 'GSIS-taxis-mothername':
+              $name=$_SESSION['GSIS-session-mothername'];
+              if ($name==null) {
+                  $name = 'GSIS-taxis value NOT set-mothername';
+              }
+              $replacements[$original] = $name;
+              break;
+            case 'GSIS-taxis-birthyear':
+              $name=$_SESSION['GSIS-session-birthyear'];
+              if ($name==null) {
+                  $name = 'GSIS-taxis value NOT set-birthyear';
+              }
+              $replacements[$original] = $name;
+              break;
 
-  }
+            } // End of switch
+    } // End of Foreach
+    }
 
-  return $replacements;  
+    return $replacements;
 }
 
- 
-function oauth2_taxis_tokens_tokens_alter(array &$replacements, array $context) {
-  if ($context['type'] == 'current-user' && !empty($context['data']['webform-submission'])) {
-    // $submission = $context['data']['webform-submission'];
-    // $node = $context['data']['node'] ? $context['data']['node'] : node_load($submission->nid);
 
-    // Find any token starting with submission:values.
-    if ($value_tokens = token_find_with_prefix($context['tokens'], 'values')) {
-      if (!empty($value_tokens['total_points'])) {
-        $replacements[$value_tokens['total_points']] = 100;
-      }
+function oauth2_taxis_tokens_tokens_alter(array &$replacements, array $context)
+{
+    if ($context['type'] == 'current-user' && !empty($context['data']['webform-submission'])) {
+        // $submission = $context['data']['webform-submission'];
+        // $node = $context['data']['node'] ? $context['data']['node'] : node_load($submission->nid);
+
+        // Find any token starting with submission:values.
+        if ($value_tokens = token_find_with_prefix($context['tokens'], 'values')) {
+            if (!empty($value_tokens['total_points'])) {
+                $replacements[$value_tokens['total_points']] = 100;
+            }
+        }
     }
-  }
 }
 
 /**
@@ -143,20 +157,20 @@ function oauth2_taxis_tokens_menu() {
   );
   return $items;
 }
- 
+
 
 function oauth2_taxis_tokens_example_form($form, &$form_state) {
   $entities = entity_get_info();
-   
+
   $token_types = array();
   $form = array();
-     
-  if (!empty( $form_state['storage']['title_dummy']))  
+
+  if (!empty( $form_state['storage']['title_dummy']))
   $form['title_dummy']['#default_value'] = $form_state['storage']['title_dummy'];
-  
+
   $form['title_dummy'] = array(
   '#type' => 'textfield',
-  '#title' => t('Subject'),  
+  '#title' => t('Subject'),
   '#size' => 60,
   '#maxlength' => 128,
   '#required' => TRUE,
@@ -166,10 +180,10 @@ function oauth2_taxis_tokens_example_form($form, &$form_state) {
     '#title' => t('Enter your text here'),
     '#default_value' => 'Hello [current-user:name]!'
   );
- 
-  if(!empty( $form_state['storage']['desc']))   
+
+  if(!empty( $form_state['storage']['desc']))
     $form['text']['#default_value'] = $form_state['storage']['desc'];
- 
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
@@ -188,7 +202,7 @@ function oauth2_taxis_tokens_example_form($form, &$form_state) {
   }
  // Token tree display ENDS
     return $form;
-   
+
 }
 
 */
@@ -198,18 +212,18 @@ function oauth2_taxis_tokens_example_form($form, &$form_state) {
  */
 /*
 function oauth2_taxis_tokens_example_form_submit($form, &$form_state) {
- 
+
  $replaced_text =  token_replace($form_state['values']['text']);
-  $insert = db_insert('test') 
+  $insert = db_insert('test')
    ->fields(array(
   'title' => $form_state['values']['title_dummy'],
-  'description' => $replaced_text, 
+  'description' => $replaced_text,
 ))
 ->execute();
  // The replacement values will save in database
   drupal_set_message('Record inserted successfully');
-  
-  
+
+
 }
 
 */
