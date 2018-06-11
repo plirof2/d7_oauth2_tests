@@ -55,12 +55,9 @@ function oauth2_taxis_tokens_token_info()
     return $info;
 }
 
-
-/* Now we need to actually return the contents (or replacement value) of this token and
- * this is done in the hook_tokens():
-*/
-
 /**
+* Now we need to actually return the contents (or replacement value) of this token and
+* this is done in the hook_tokens():
 * Implements hook_tokens().
 */
 function oauth2_taxis_tokens_tokens($type, $tokens, array $data = array(), array $options = array())
@@ -142,88 +139,3 @@ function oauth2_taxis_tokens_tokens_alter(array &$replacements, array $context)
         }
     }
 }
-
-/**
- * Implements hook_menu().
- */
-/*
-function oauth2_taxis_tokens_menu() {
-  $items['examples/token_test'] = array(
-    'title' => 'Token example',
-    'description' => 'Test replacement tokens in real time.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('oauth2_taxis_tokens_example_form'),
-    'access callback' => TRUE,
-  );
-  return $items;
-}
-
-
-function oauth2_taxis_tokens_example_form($form, &$form_state) {
-  $entities = entity_get_info();
-
-  $token_types = array();
-  $form = array();
-
-  if (!empty( $form_state['storage']['title_dummy']))
-  $form['title_dummy']['#default_value'] = $form_state['storage']['title_dummy'];
-
-  $form['title_dummy'] = array(
-  '#type' => 'textfield',
-  '#title' => t('Subject'),
-  '#size' => 60,
-  '#maxlength' => 128,
-  '#required' => TRUE,
-);
-  $form['text'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Enter your text here'),
-    '#default_value' => 'Hello [current-user:name]!'
-  );
-
-  if(!empty( $form_state['storage']['desc']))
-    $form['text']['#default_value'] = $form_state['storage']['desc'];
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit'),
-  );
- // Token tree display STARTS
-  if (module_exists('token')) {
-    $form['token_tree'] = array(
-      '#theme' => 'token_tree',
-      '#token_types' => $token_types,
-    );
-  }
-  else {
-    $form['token_tree'] = array(
-      '#markup' => '<p>' . t('Enable the <a href="@drupal-token">Token module</a> to view the available token browser.', array('@drupal-token' => 'http://drupal.org/project/token')) . '</p>',
-    );
-  }
- // Token tree display ENDS
-    return $form;
-
-}
-
-*/
-
-/**
- * Submit callback; store the submitted values into storage.
- */
-/*
-function oauth2_taxis_tokens_example_form_submit($form, &$form_state) {
-
- $replaced_text =  token_replace($form_state['values']['text']);
-  $insert = db_insert('test')
-   ->fields(array(
-  'title' => $form_state['values']['title_dummy'],
-  'description' => $replaced_text,
-))
-->execute();
- // The replacement values will save in database
-  drupal_set_message('Record inserted successfully');
-
-
-}
-
-*/
