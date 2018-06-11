@@ -17,7 +17,7 @@ http://forms2.minedu.gov.gr/formspde/gsis?code=t8229A&state=_gsis_6857058725b0fa
  */
 function _oauth2_transform_username($username){
 
-	$username='gsis-'+$username;
+	$username='gsis-'.$username;
 	return $username;
 }
 
@@ -236,7 +236,7 @@ function oauth2_gsis_authenticate($name, $access_token) { //SHOULD maybe renamed
   $password="dummy pass";
   // Only check for a valid user if the username & password were set.
   if (!empty($name) /* && !empty($password)*/) {
-
+  	//$name=_oauth2_transform_username($name);
     // Attempt to load a local user with that name.
     $account = user_load_by_name($name);
 
@@ -300,6 +300,7 @@ function taxis_loginUserLocally($account)
    */
   function oauth2_createUserLocally($name) {
     global $user;
+    //$name=_oauth2_transform_username($name);
     if ($user->uid) {
       //Don't Login  because we already are
       return;
@@ -381,6 +382,7 @@ function taxis_user_register($cas_name, $options = array()) {
   //echo "<h1>ROLE GOT= $gsis_role_id->rid</h1>";
   // Add some reasonable defaults if they have not yet been provided.
   //$edit = isset($options['edit']) ? $options['edit'] : array();
+  //$cas_name=_oauth2_transform_username($cas_name)
   $edit=array();
   $edit += array(
     'name' => $cas_name,
@@ -402,7 +404,7 @@ function taxis_user_register($cas_name, $options = array()) {
 
   // Create the user account.
   $account = user_save(drupal_anonymous_user(), $edit);
-  watchdog("user", 'new user: %n (CAS)', array('%n' => format_username($account)), WATCHDOG_NOTICE, l(t("edit user"), "user/edit/$account->uid"));
+  watchdog("user", 'new user: %n (GsIs)', array('%n' => format_username($account)), WATCHDOG_NOTICE, l(t("edit user"), "user/edit/$account->uid"));
 
   if (!empty($options['invoke_cas_user_presave'])) {
     // Populate $edit with some basic properties.
@@ -495,33 +497,6 @@ function oauth2_gsis_login_block($form) {
 
 
 
-/**
- * Implements hook_init().
- *
- * Traps a page load to see if authentication is required.
- */
-/*
-function oauth2_gsis_init() {
-  global $user;
-
-  // Process a single-sign out request.
-  //_cas_single_sign_out_check();
-
-  // If a user is not logged in, consider using CAS authentication.
-  if (!$user->uid) {
-    $force_authentication = _oauth2cas_force_login();
-    //$check_authentication = _cas_allow_check_for_login();
-    $request_type = $_SERVER['REQUEST_METHOD'];
-    $perform_login_check = $force_authentication || ($check_authentication && ($request_type == 'GET'));
-    if ($perform_login_check) {
-      //cas_login_check($force_authentication);
-    }
-  }
-}
-*/
-
-
-
 //##########################  STEP 1 send client_id #############################$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#############
 /**
  * Determine if we should require the user be authenticated.
@@ -549,7 +524,7 @@ function oauth2gsis_login_page() {
   $httpClient = NULL;
 
 
-    $http = new \GuzzleHttp\Client;
+    $http = new \GuzzleHttp\Client; //jon - this might not be needed
 
 
 
@@ -578,17 +553,7 @@ function oauth2gsis_login_page() {
       //echo "<h1>INSIDE START A1 step2 oauth2gsis_login_page</h1>";
       $code = $_REQUEST['code'];
       $state = $_REQUEST['state'];
-      /*
-      if($state=="_gsis_") {
-      	// This is for the LOGOUT part...
-      	//oauth2_gsis_remote_logout();
-      	drupal_set_message ("713 gsis_logout_callback oauth2gsis_login_page REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
-  		//if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto($_SESSION['GSIS-session-last-webform-url']);
-      	//return ['#markup' => t("Hello WORLS state=_gsis_")];
 
-      }
-      */
-      //drupal_set_message($code."---".$state);
 
 
       //try {
@@ -607,10 +572,10 @@ function oauth2gsis_login_page() {
         ]
         )->getBody(TRUE)->getContents();
 
-        var_dump($tokenjson);
+        //var_dump($tokenjson);
         ///$tokenarray = Json::decode($tokenjson);
         $tokenarray = json_decode($tokenjson,true);
-        var_dump($tokenarray);
+        //var_dump($tokenarray);
       //}
         /*
       catch (RequestException $e) {
@@ -637,13 +602,13 @@ function oauth2gsis_login_page() {
           ],
         ]
         )->getBody(TRUE)->getContents();
-        var_dump($userxml);
+        //var_dump($userxml);
         // In case of error gsis sends JSON !!!
         //$checkerror = Json::decode($userxml);
         $checkerror = json_decode($userxml,true);
 
         if ($checkerror !== NULL) {
-          return ['#markup' => $this->t("ERR: 005 Data collection problem from the General Secretariat of Information Systems.")];
+          return ['#markup' => $this->t("ERR:  Data return error")];
         }
         //drupal_set_message("XML=".$userxml);
         $xml = simplexml_load_string($userxml);
@@ -690,7 +655,9 @@ function oauth2gsis_login_page() {
         //print_r($userDetails);
 
         //var_dump($userDetails);
-        oauth2_gsis_authenticate($userid,$tokenarray['access_token']);  // Need to replace Class file
+        //oauth2_gsis_authenticate($userid,$tokenarray['access_token']);  // Need to replace Class file
+        oauth2_gsis_authenticate(_oauth2_transform_username($userid),$tokenarray['access_token']);  // transform username before doing anything
+        
         return array('#markup'=>arg(0).arg(1).'GSIS CALLBACK Now we should create a USER and then Logout from GSIS');
         ////$this->createUser($userDetails);
         
