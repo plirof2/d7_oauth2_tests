@@ -1,5 +1,5 @@
 name = oauth2_gsis
-description =oauth2_gsis  Authenticates Drupal users via OAuth2
+description =oauth2_gsis  Authenticates Drupal users via OAuth2 . Note: GSIS-LOGIN Block is auto-enabled for bartik theme. For others you must enable it manually
 core = 7.x
 package = OAuth2
 
@@ -13,7 +13,7 @@ dependencies[] = oauth2_taxis_tokens
 ; files[] = classes/OAuth2AuthenticationClient.class.php
 
 ; Information added by Drupal.org packaging script on 2015-01-22
-version = "7.x-1.0+1-dev"
+version = "7.x-1.0+2-devjon"
 core = "7.x"
 project = "oauth2_gsis"
 datestamp = "1421965382"

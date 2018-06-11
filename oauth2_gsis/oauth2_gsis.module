@@ -13,7 +13,9 @@ use GuzzleHttp\Client;
 */
 
 /**
- * Here we can tranfosm/trnascode/md5 ,or whater the username do it won;t show normal in the database
+ * Here we can tranfosm/transcode/md5hash ,or whatever the username so it won't store the original username in the database
+ * @param $username
+ *   The original name of the gsis user we want to transform.
  */
 function _oauth2_transform_username($username)
 {
@@ -27,6 +29,17 @@ function _oauth2_transform_username($username)
 function _oauth2_getUrl($url_name)
 {
     $wanted_url="";
+
+    /*
+    //GSIS test server
+    if($url_name=='tokenUrl')       return 'https://test.gsis.gr/oauth2server/oauth/token';
+    if($url_name=='userinfoUrl')     return 'https://test.gsis.gr/oauth2server/userinfo';
+    if($url_name=='authorizeUrl')    return 'https://test.gsis.gr/oauth2server/oauth/authorize';
+    if($url_name=='logoutRemoteUrl')    return 'https://test.gsis.gr/oauth2server/logout/';
+
+    if($url_name=='redirectUri')     return 'http://forms2.minedu.gov.gr/formspde/gsis';
+    if($url_name=='redirectLogoutCallbackUri')      return 'http://forms2.minedu.gov.gr/formspde/gsis_logout_callback';
+    */
 
     // NODE js server
     if ($url_name=='tokenUrl') {
@@ -388,7 +401,7 @@ function oauth2_gsis_login_block($form)
     $form['oauth2_gsis_login_redirection_message'] = array(
       '#type' => 'item',
       //'#markup' => t(variable_get('oauth2_gsis_login_redir_message', "oauth2_gsis_LOGIN_REDIR_MESSAGE")),
-      '#markup' => t(variable_get('oauth2_gsis_login_redir_message', "|----|")),
+      '#markup' => t(variable_get('oauth2_gsis_login_redir_message', ".")),
       '#weight' => -1,
     );
     $form['actions'] = array('#type' => 'actions');
@@ -400,7 +413,16 @@ function oauth2_gsis_login_block($form)
     return $form;
 }
 
-
+/**
+ * Implements hook_block_info_alter().
+ */
+function oauth2_gsis_block_info_alter(&$blocks, $theme, $code_blocks) {
+  if ($theme == 'bartik') {  // This auto-enables for BARTIK theme . For other activate it manually
+    $blocks['oauth2_gsis']['login']['status'] = TRUE;
+    $blocks['oauth2_gsis']['login']['region'] = 'header';
+    //$blocks['oauth2_gsis']['login']['region'] = 'sidebar_first';
+  }
+}
 
 //##########################  STEP 1 send client_id #############################$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#############
 /**
