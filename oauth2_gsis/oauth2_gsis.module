@@ -12,7 +12,14 @@ REmote logout  https://test.gsis.gr/oauth2server /logout/{clientId_δικό μα
 http://forms2.minedu.gov.gr/formspde/gsis?code=t8229A&state=_gsis_6857058725b0fadf00e4d1
  */
 
+/**
+ * Here we can tranfosm/trnascode/md5 ,or whater the username do it won;t show normal in the database
+ */
+function _oauth2_transform_username($username){
 
+	$username='gsis-'+$username;
+	return $username;
+}
 
 function oauth2_getUrl($url_name){
  	$wanter_url="";
@@ -43,7 +50,7 @@ function oauth2_getUrl($url_name){
 
 function oauth2_getConData($code){
 
-	//test node js
+	//test with fake node js
     $data = [
           'code' => $code,
           'redirect_uri' => oauth2_getUrl('redirectUri'),
@@ -130,36 +137,7 @@ function oauth2_gsis_permission() {
   );
 }
 
-/**
- * Implements hook_menu_alter().
- *
- * Alter some core menu functionality to potentially disable some items.
- */
 /*
-function oauth2_gsis_menu_alter(&$items) {
-  global $user, $language;
-
-  // Set the path for password resets.
-  $path = 'user/password';
-
-  // Restrict the password reset page to user administrators if password editing
-  // is disabled.
-  if ((!variable_get('oauth2_gsis_user_edit_password', FALSE)) &&
-      ($user->uid != 1)) {
-    $items[$path]['access callback'] = 'user_access';
-    $items[$path]['access arguments'] = array('administer users');
-
-    // Add support for language-prefixed paths.  There doesn't appear to be an
-    // easy way to get them so let's use global variables to do so.
-    if (($language->language != LANGUAGE_NONE) && (!empty($language->prefix))) {
-      $prefix = $language->prefix;
-      $items[$prefix . '/' . $path]['access callback'] = 'user_access';
-      $items[$prefix . '/' . $path]['access arguments'] = array('administer users');
-    }
-  }
-}
-*/
-/**
  * Implements hook_form_FORM_ID_alter() for the user_login form.
  *
  * As per user_login_default_validators(), there are three (3) standard
@@ -174,89 +152,7 @@ function oauth2_gsis_menu_alter(&$items) {
  * exists as per the remote authorization service, but not locally, we want to
  * create it.
  */
-/*
-function oauth2_gsis_form_user_login_alter(&$form, &$form_state, $form_id) {
 
-  // Replace the user_login_authenticate_validate() call with our own
-  // oauth2_gsis_login_authenticate_validate() function.
-  if ($form_id == 'user_login_block' || $form_id == 'user_login') {
-    drupal_set_message("AAAAA oauth2_gsis_form_user_login_alter");
-    // …
-  }
-drupal_set_message( "FORM LOGIN helloooo oauth2_gsis_form_user_login_alter");
-//$my_url='http://localhost:8282/o/oauth2/v2/auth?client_id=dummy-client-id&redirect_uri=http://localhost/drupal84/gsis&response_type=code&scope=read&state=_gsis_20924727255b0d0195aa34b ';
-
-  
-  if (in_array('user_login_authenticate_validate', $form['#validate'])) {
-    $key = array_search('user_login_authenticate_validate', $form['#validate']);
-    $form['#validate'][$key] = 'oauth2_gsis_login_authenticate_validate';
-  }
-  
-}
-*/
-/**
- * Implements hook_form_FORM_ID_alter() for the user_login_block form.
- */
-/*
-function oauth2_gsis_form_user_login_block_alter(&$form, &$form_state, $form_id) {
-  global $user;
-  drupal_set_message( "LOGIN BLOCK helloooo  oauth2_gsis_form_user_login_block_alter");
-
-  // Make the same changes as we're making to the standard login form.  See
-  // oauth2_gsis_form_user_login_alter() for details.
-  oauth2_gsis_form_user_login_alter($form, $form_state, $form_id);
-
-  // Disable password-reset links if applicable.
-
-
-}
-*/
-
-/**
- * Implements hook_form_FORM_ID_alter() for the user_profile_form form.
- *
- * Disable editing of externally-controlled user profile fields.  These user
- * attributes would normally be controlled by another CRM-type system.  To set
- * which fields are to enabled or disabled, go to the module configuration page.
- * By default, they are all disabled.
- */
-//function oauth2_gsis_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
-//  global $user;
-//  drupal_set_message( "PROFILE FORM ALTER helloooo  oauth2_gsis_form_user_profile_form_alte");
-/*
-  // We want to keep user fields editable for user administrators so exit if the
-  // current user is one of them.
-  if (($user->uid == 1) || user_access('administer users')) {
-    return;
-  }
-
-  // Get configuration info on which user attributes are not to be edited.
-  $disable_email = !variable_get('oauth2_gsis_user_edit_email', FALSE);
-  $disable_password_change = !variable_get('oauth2_gsis_user_edit_password', FALSE);
-
-  // Disable the current password field if neither the e-mail nor the password
-  // fields are editable.  It's only needed if one wishes to edit either of
-  // those fields.
-  $disable_password_current = ($disable_email && $disable_password_change);
-
-  // Disable editing of the E-mail Address field if was configured as such.
-  if ($disable_email) {
-    $form['account']['mail']['#disabled'] = TRUE;
-  }
-
-  // Disable editing of the Password & Confirm Password fields if they were
-  // configured as such.
-  if ($disable_password_change) {
-    $form['account']['pass']['#disabled'] = TRUE;
-  }
-
-  // Disable editing of the Current Password field if was configured as such.
-  if ($disable_password_current) {
-    $form['account']['current_pass']['#disabled'] = TRUE;
-  }
-
-  */
-//}
 
 /**
  * Implements hook_user_logout().
@@ -303,8 +199,10 @@ function oauth2_init_remote_logout() {
    //$getlogouturl='https://test.gsis.gr/oauth2server/logout/'.oauth2_getConData('')['client_id'].'/?url=http://forms2.minedu.gov.gr/formspde/gsis_logout_callback';
   //$encoded_url=urlencode('http://forms2.minedu.gov.gr/formspde/gsis_logout_callback?return_path='.$_SESSION['GSIS-session-last-webform-url']);
   //////$encoded_url=urlencode(oauth2_getUrl('redirectLogoutCallbackUri')+'?return_path='.$_SESSION['GSIS-session-last-webform-url']);
+  
+  
+  $encoded_url=urlencode(oauth2_getUrl('redirectLogoutCallbackUri').'?return_path='.$_SESSION['GSIS-session-last-webform-url']);
   drupal_set_message(oauth2_getUrl('redirectLogoutCallbackUri') .$encoded_url);
-  $encoded_url=urlencode('http://localhost/formspde-test/gsis_logout_callback?return_path='.$_SESSION['GSIS-session-last-webform-url']);
   $getlogouturl=oauth2_getUrl('logoutRemoteUrl').oauth2_getConData('')['client_id'].'/?url='.$encoded_url;
   //$getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
   drupal_goto($getlogouturl); //redirect to Oauth2 server
@@ -316,55 +214,6 @@ function oauth2_init_remote_logout() {
  * Drupal Core Function Replacements
  ****************************************************************************/
 
-/**
- * Replacement for user_login_authenticate_validate().
- *
- * All code here except for the last stanza should be identical to what's in
- * user_login_authenticate_validate().  The last stanza is the only thing we'd
- * like to change as that's the function call we actually care about.
- */
-/*
-function oauth2_gsis_login_authenticate_validate($form, &$form_state) {
-  $password = trim($form_state['values']['pass']);
-  if (!empty($form_state['values']['name']) && !empty($password)) {
-    // Do not allow any login from the current user's IP if the limit has been
-    // reached. Default is 50 failed attempts allowed in one hour. This is
-    // independent of the per-user limit to catch attempts from one IP to log
-    // in to many different user accounts.  We have a reasonably high limit
-    // since there may be only one apparent IP for all users at an institution.
-    if (!flood_is_allowed('failed_login_attempt_ip', variable_get('user_failed_login_ip_limit', 50), variable_get('user_failed_login_ip_window', 3600))) {
-      $form_state['flood_control_triggered'] = 'ip';
-      return;
-    }
-    $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $form_state['values']['name']))->fetchObject();
-    if ($account) {
-      if (variable_get('user_failed_login_identifier_uid_only', FALSE)) {
-        // Register flood events based on the uid only, so they apply for any
-        // IP address. This is the most secure option.
-        $identifier = $account->uid;
-      }
-      else {
-        // The default identifier is a combination of uid and IP address. This
-        // is less secure but more resistant to denial-of-service attacks that
-        // could lock out all users with public user names.
-        $identifier = $account->uid . '-' . ip_address();
-      }
-      $form_state['flood_control_user_identifier'] = $identifier;
-
-      // Don't allow login if the limit for this user has been reached.
-      // Default is to allow 5 failed attempts every 6 hours.
-      if (!flood_is_allowed('failed_login_attempt_user', variable_get('user_failed_login_user_limit', 5), variable_get('user_failed_login_user_window', 21600), $identifier)) {
-        $form_state['flood_control_triggered'] = 'user';
-        return;
-      }
-    }
-
-    // We are not limited by flood control, so try to authenticate.
-    // Set $form_state['uid'] as a flag for user_login_final_validate().
-    $form_state['uid'] = oauth2_gsis_authenticate($form_state['values']['name'], $password);
-  }
-}
-*/
 /**
  * Replacement for user_authenticate().
  *
@@ -391,9 +240,6 @@ function oauth2_gsis_authenticate($name, $access_token) { //SHOULD maybe renamed
     // Attempt to load a local user with that name.
     $account = user_load_by_name($name);
 
-    // Instantiate an OAuth2 Authentication class with the credentials.
-    //$class = variable_get('oauth2_gsis_class', 'OAuth2AuthenticationClient');
-    //$client = new $class($name, $password);
 
     // If the load was successful, we can see if the entered password is valid.
     if ($account) {
@@ -408,13 +254,11 @@ function oauth2_gsis_authenticate($name, $access_token) { //SHOULD maybe renamed
     else /* there is no local user account */ {
       //drupal_set_message("oauth2_gsis_authenticate NO account , NO LOCAL USER");
       // Instantiate an OAuth2 Authentication class with the credentials.
-      echo "<h1>oauth2_gsis_authenticate NO account , NO LOCAL USER</h1>";
-      //$class = variable_get('oauth2_gsis_class', 'OAuth2AuthenticationClient');
-      //$client = new $class($name, $password);
+      //echo "<h1>oauth2_gsis_authenticate NO account , NO LOCAL USER</h1>";
       
       // Check if the user exists remotely.
       if (isset($access_token)) {
-        echo "<h1>INSIDE B1b oauth2_gsis_authenticate NO LOCAL USER</h1>";
+        //echo "<h1>INSIDE B1b oauth2_gsis_authenticate NO LOCAL USER</h1>";
         // We're dealing with a valid remote user so create it locally.
         //$uid = $this->createUserLocally()->uid;//ORIG
         $uid = oauth2_createUserLocally($name);//ORIG
