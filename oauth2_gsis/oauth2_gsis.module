@@ -98,7 +98,7 @@ function oauth2_gsis_menu() {
 
   $items['oauth2gsisconnect'] = array(
     'path' => 'gsis',
-    'title' => 'AAAACAS Login',
+    'title' => 'GSIS Login',
     'page callback' => 'oauth2gsis_login_page',
     'access callback' => 'user_is_anonymous',
     'type' => MENU_SUGGESTED_ITEM,
@@ -106,7 +106,7 @@ function oauth2_gsis_menu() {
 
   $items['oauth2gsislogout'] = array(
     'path' => 'gsis_logout_callback',
-    'title' => 'AAAACAS Login',
+    'title' => 'GSIS logout',
     'page callback' => 'oauth2_gsis_remote_logout',
     'access callback' => 'user_is_logged_in',
     'type' => MENU_SUGGESTED_ITEM,
@@ -309,7 +309,7 @@ function taxis_loginUserLocally($account)
     // ++++++++++++++++++++++++++= FROM CAS MODULE START+++++++++++++++++++++++++++++++++++++++++++++++++++++++    
     $account = user_load_by_name($name);
     // Automatic user registration.
-    if (!$account /*&& $cas_user['register']*/) {
+    if (!$account /*&& $gsis_user['register']*/) {
       //drupal_set_message("<h1>INSIDE oauth2_createUserLocally No account could be found attempt to register a new user</h1>");
       // No account could be found and auto registration is enabled, so attempt
       // to register a new user.
@@ -318,7 +318,7 @@ function taxis_loginUserLocally($account)
         // The account could not be created, set a message.
         //echo "<h1>INSIDE oauth2_createUserLocally The account could not be created, set a message.</h1>";
         if ($force_authentication) {
-          drupal_set_message(t('A new account could not be created for %cas_name. The username is already in use on this site.', array('%cas_name' => $cas_name)), 'error');
+          drupal_set_message(t('A new account could not be created for %cas_name. The username is already in use on this site.', array('%cas_name' => $gsis_user)), 'error');
         }
         return;
       }
@@ -364,7 +364,7 @@ function taxis_loginUserLocally($account)
 /**
  * Register a CAS user with some default values.
  *
- * @param $cas_name
+ * @param $gsis_user
  *   The name of the CAS user.
  * @param $options
  *   An associative array of options, with the following elements:
@@ -377,25 +377,25 @@ function taxis_loginUserLocally($account)
  *   The user object of the created user, or FALSE if the user cannot be
  *   created.
  */
-function taxis_user_register($cas_name, $options = array()) {
+function taxis_user_register($gsis_user, $options = array()) {
   $gsis_role_id=user_role_load_by_name("GSIS_USER");
   //echo "<h1>ROLE GOT= $gsis_role_id->rid</h1>";
   // Add some reasonable defaults if they have not yet been provided.
   //$edit = isset($options['edit']) ? $options['edit'] : array();
-  //$cas_name=_oauth2_transform_username($cas_name)
+  //$gsis_user=_oauth2_transform_username($gsis_user)
   $edit=array();
   $edit += array(
-    'name' => $cas_name,
+    'name' => $gsis_user,
     'pass' => user_password(),
-    'init' => $cas_name,
-    'mail' => $cas_name."@example.com",//variable_get('cas_domain', '') ? $cas_name . '@' . variable_get('cas_domain', '') : '',
+    'init' => $gsis_user,
+    'mail' => $gsis_user."@example.com",//variable_get('cas_domain', '') ? $gsis_user . '@' . variable_get('cas_domain', '') : '',
     'status' => 1,
     //'roles' => array('roles' => array($gsis_role => $gsis_role)) ,
     //'roles' => array('10' => 10) , //OK GSIS
     'roles' => array($gsis_role_id->rid => $gsis_role_id->rid) ,
   );
   ///$edit['roles'] += cas_roles();
-  //$edit['cas_name'] = $cas_name;
+  //$edit['cas_name'] = $gsis_user;
 
   // See if the user name is already taken.
   if ((bool) db_select('users')->fields('users', array('name'))->condition('name', db_like($edit['name']), 'LIKE')->range(0, 1)->execute()->fetchField()) {
@@ -410,7 +410,7 @@ function taxis_user_register($cas_name, $options = array()) {
     // Populate $edit with some basic properties.
     $edit = array(
       'cas_user' => array(
-        'name' => $cas_name,
+        'name' => $gsis_user,
       ),
     );
 
