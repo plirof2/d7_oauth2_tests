@@ -240,10 +240,10 @@ function taxis_loginUserLocally($account)
     if (!$account /*&& $gsis_user['register']*/) {
       // No account could be found and auto registration is enabled, so attempt
       // to register a new user.
-      $account = taxis_user_register($name);
+      $account = taxis_user_register($name); 
       if (!$account) {
         // The account could not be created, set a message.
-        //echo "<h1>INSIDE oauth2_createUserLocally The account could not be created, set a message.</h1>";
+        //drupal_set_message("246 - oauth2_createUserLocally - user could not be created");
         if ($force_authentication) {
           drupal_set_message(t('A new account could not be created for %name. The username is already in use on this site.', array('%name' => $name)), 'error');
         }
@@ -264,7 +264,7 @@ function taxis_loginUserLocally($account)
     ///$user = user_save(NULL, $user);
 
     // Report the new user in the log.
-    watchdog('oauth2_authentication', 'New user: %name (%email).', array(
+    watchdog('oauth2_gsis', 'New user: %name (%email).', array(
       '%name' => $name,
       '%email' => $email ? $email : 'no e-mail address',
     ), WATCHDOG_NOTICE, l(t('edit'), 'user/' . $user->uid . '/edit'));
@@ -278,13 +278,12 @@ function taxis_loginUserLocally($account)
  * Register a CAS user with some default values.
  *
  * @param $gsis_user
- *   The name of the CAS user.
+ *   The name of the gsis user.
  * @param $options
  *   An associative array of options, with the following elements:
  *    - 'edit': An array of fields and values for the new user. If omitted,
  *      reasonable defaults are used.
- *    - 'invoke_cas_user_presave': Defaults to FALSE. Whether or not to invoke
- *      hook_cas_user_presave() on the newly created account.
+
  *
  * @return
  *   The user object of the created user, or FALSE if the user cannot be
@@ -313,31 +312,14 @@ function taxis_user_register($gsis_user, $options = array()) {
   $account = user_save(drupal_anonymous_user(), $edit);
   watchdog("user", 'new user: %n (GsIs)', array('%n' => format_username($account)), WATCHDOG_NOTICE, l(t("edit user"), "user/edit/$account->uid"));
 
-  
-  if (!empty($options['invoke_cas_user_presave'])) {
-    // Populate $edit with some basic properties.
-    $edit = array(
-      'user' => array(
-        'name' => $gsis_user,
-      ),
-    );
-	
-    // Allow other modules to make their own custom changes.
-    //cas_user_module_invoke('presave', $edit, $account);
 
-    // Clean up extra variables before saving.
-    //unset($edit['cas_user']);
-
-    $account = user_save($account, $edit);
-  }
-  //echo "<h1>INSIDE taxis_user_register ok USER $name CREATED</h1>";
   // Reload to ensure that we have a fully populated user object.
   return user_load($account->uid);
 }
 
 
 
-//+++++++++++++++++++++++++ block CASModifications ++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++ block for GSIS LOGIN  ++++++++++++++++++++++++++++++++++++++++
 
 /**
  * Implements hook_block_info().
@@ -374,9 +356,7 @@ function oauth2_gsis_block_view($delta = '') {
  */
 function oauth2_gsis_login_block($form) {
 
-    // Instantiate an OAuth2 Authentication class with the credentials.
-    //$class = variable_get('oauth2_gsis_class', 'OAuth2AuthenticationClient');
-    //$client = new $class($name, $password);
+
   //echo "<h3>CURRENT PATH =". request_path()."</h3>";
   //$form['#action'] = url('cas', array('query' => drupal_get_destination()));
   //$form['#action'] = url('oauth2/authorized', array('query' => drupal_get_destination()));// Call A ROUTE that CALLS taxis
