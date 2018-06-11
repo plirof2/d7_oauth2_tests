@@ -1,0 +1,596 @@
+<?php
+use GuzzleHttp\Client;
+
+/**
+ * @file
+ * Provides functionality for the OAuth2 Authentication module.
+http://localhost:8282/o/oauth2/v2/auth            ?client_id=dummy-client-id&redirect_uri=http%3A%2F%2Flocalhost%2Fformspde-test%2Foauth2callback &response_type=code&state=483caffb45b611f58fc9ee6e03743b4a
+https://test.gsis.gr/oauth2server/oauth/authorize ?client_id=AAAAAAAA       &redirect_uri=http://forms2.minedu.gov.gr/gsis                       &response_type=code&state=_gsis_6857058725b0fadf00e4d1&scope=read
+
+REmote logout  https://test.gsis.gr/oauth2server /logout/{clientId_δικό μας}/?url=https://eduslim1.minedu.gov.gr/laravel/logout.htm
+
+http://forms2.minedu.gov.gr/formspde/gsis?code=t8229A&state=_gsis_6857058725b0fadf00e4d1
+ */
+
+/**
+ * Here we can tranfosm/trnascode/md5 ,or whater the username do it won;t show normal in the database
+ */
+function _oauth2_transform_username($username){
+	if (is_null($username)) return null;
+	$username='gsis-'.$username;
+	return $username;
+}
+
+function _oauth2_getUrl($url_name){
+ 	$wanted_url="";
+
+ 	
+ 	// NODE js server
+ 	if($url_name=='tokenUrl')     		return 'http://localhost:8282/oauth2/v4/token';
+    if($url_name=='userinfoUrl')     	return 'http://localhost:8282/oauth2/v3/userinfo';
+    if($url_name=='authorizeUrl')    	return 'http://localhost:8282/o/oauth2/v2/auth';
+    if($url_name=='logoutRemoteUrl')    return 'http://localhost:8282/oauth2server/logout/';
+
+    if($url_name=='redirectUri')     	return 'http://localhost/formspde-test/gsis';
+    if($url_name=='redirectLogoutCallbackUri')      return 'http://localhost/formspde-test/gsis_logout_callback';
+    	
+	
+	/*
+	//GSIS test server
+ 	if($url_name=='tokenUrl')     	return 'https://test.gsis.gr/oauth2server/oauth/token';
+    if($url_name=='userinfoUrl')     return 'https://test.gsis.gr/oauth2server/userinfo';
+    if($url_name=='authorizeUrl')    return 'https://test.gsis.gr/oauth2server/oauth/authorize';
+    if($url_name=='logoutRemoteUrl')    return 'https://test.gsis.gr/oauth2server/logout/';
+
+    if($url_name=='redirectUri')     return 'http://forms2.minedu.gov.gr/formspde/gsis';
+    if($url_name=='redirectLogoutCallbackUri')      return 'http://forms2.minedu.gov.gr/formspde/gsis_logout_callback';
+	*/
+ 	return $wanted_url;
+}
+
+function _oauth2_getConData($code){
+
+	//test with fake node js
+    $data = [
+          'code' => $code,
+          'redirect_uri' => _oauth2_getUrl('redirectUri'),
+          'client_id' => 'dummy-client-id',
+          'client_secret' => 'dummy-client-secret',
+          'scope' => '',
+          'grant_type' => 'authorization_code',
+    ];
+
+    /*
+	//testgsis
+ 	$data = [
+          'code' => $code,
+          'redirect_uri' => _oauth2_getUrl('redirectUri'),
+          'client_id' => 'AAAAAAAA',
+          'client_secret' => 'AAAAAAAA',
+          'scope' => '',
+          'grant_type' => 'authorization_code',
+    ];
+    */
+
+ 	return $data;
+}
+
+
+/****************************************************************************
+ * Drupal Core Hooks
+ ****************************************************************************/
+
+/**
+ * Implements hook_menu().
+ */
+function oauth2_gsis_menu() {
+  $items = array();
+
+  $items['oauth2gsisconnect'] = array(
+    'path' => 'gsis',
+    'title' => 'GSIS Login',
+    'page callback' => 'oauth2gsis_login_page',
+    'access callback' => 'user_is_anonymous',
+    'type' => MENU_SUGGESTED_ITEM,
+  );
+
+  $items['oauth2gsislogout'] = array(
+    'path' => 'gsis_logout_callback',
+    'title' => 'GSIS logout',
+    'page callback' => 'oauth2_gsis_remote_logout',
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_SUGGESTED_ITEM,
+  );  
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function oauth2_gsis_permission() {
+  return array(
+    'administer oauth2 authentication' => array(
+      'title' => t('Administer authentication parameters'),
+      'description' => t('Allows users to set authentication parameters such as the token endpoint and client credentials.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_user_logout().
+ *
+ * Purge any access tokens stored in the user's session.  We definitely don't
+ * want these to be used by a different user that logs in sometime between now
+ * and the existing token's expiration time.
+ */
+//function oauth2_gsis_user_logout($account) {
+function oauth2_gsis_remote_logout() {  // got here from  /gsis_logout_callback
+
+
+  //drupal_set_message ("139 gsis_logout_callback oauth2_gsis_remote_logout REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
+  //drupal_set_message ("140 gsis_logout_callback oauth2_gsis_remote_logout RETURN path =".$_REQUEST['return_path']);
+  //if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto($_SESSION['GSIS-session-last-webform-url']);
+  if (isset($_REQUEST['return_path'])) drupal_goto($_REQUEST['return_path']);
+
+
+}
+
+//function oauth2_gsis_user_logout($account) {
+function oauth2_init_remote_logout() { 
+
+  // As using unset() on a global variable may not always unset it outside of
+  // the current scope, simply drop any OAuth2 tokens by assigning an empty
+  // list.
+  //$_SESSION['oauth2_client'] = array();
+  
+  $encoded_url=urlencode(_oauth2_getUrl('redirectLogoutCallbackUri').'?return_path='.$_SESSION['GSIS-session-last-webform-url']);
+  //drupal_set_message(_oauth2_getUrl('redirectLogoutCallbackUri') .$encoded_url);
+  $getlogouturl=_oauth2_getUrl('logoutRemoteUrl')._oauth2_getConData('')['client_id'].'/?url='.$encoded_url;
+  //$getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
+  drupal_goto($getlogouturl); //redirect to Oauth2 server
+
+
+}
+
+/****************************************************************************
+ * Drupal Core Function Replacements
+ ****************************************************************************/
+
+/**
+ * Replacement for user_authenticate().
+ *
+ * user_authenticate() determines if a user is valid by looking it up in the
+ * local database.  If that's not the case, the user may exist in the remote
+ * system.  So we want to add him/her locally if he/she exists there.  If the
+ * user does exist locally, we'd like to add a token to his/her session.
+ *
+ * @param $name
+ *   User name to authenticate. (this should have already passed through function _oauth2_transform_username)
+ * @param $access_token)
+ *   the access_token of the oauth2 handshake
+ * @return
+ *   The user's uid on success, or FALSE on failure to authenticate.
+ */
+function oauth2_gsis_authenticate($name, $access_token) { //SHOULD maybe renamed to not being hook
+  
+  // Assume the user is invalid until we determine otherwise.
+  $uid = FALSE;
+  $password="dummy pass";
+  // Only check for a valid user if the username & password were set.
+  if (!empty($name) /* && !empty($password)*/) {
+  	//$name=_oauth2_transform_username($name);
+    // Attempt to load a local user with that name.
+    $account = user_load_by_name($name);
+
+
+    // If the load was successful, we can see if the entered password is valid.
+    if ($account) {
+      taxis_loginUserLocally($account);
+    }
+    else /* there is no local user account */ {
+      //drupal_set_message("oauth2_gsis_authenticate NO account , NO LOCAL USER");
+      
+      // Check if the user exists remotely.
+      if (isset($access_token)) {
+        // We're dealing with a valid remote user so create it locally.
+        //$uid = $this->createUserLocally()->uid;//ORIG
+        $uid = oauth2_createUserLocally($name);//ORIG
+
+      }
+    }
+  }
+  // Return the user's local ID if there is one.
+  return $uid;
+}
+
+
+function taxis_loginUserLocally($account)
+{
+    global $user;
+    // Override the global user.
+    $user = user_load($account->uid);
+    $login_array = array('name' => $account->name);
+    user_login_finalize($login_array);
+    oauth2_init_remote_logout(); // imidiatelly start remote logout process. Ther is no need for an external open session with gsis.
+}
+
+
+
+
+  /**
+   * Create a new user based on the successful validation of a remote user.
+   *
+   * This function creates a new local Drupal user if a corresponding remote
+   * user exists, but doesn't exist here yet.
+   *
+   * @return
+   *   A fully-loaded $user object upon successful creation or FALSE on failure.
+   */
+  function oauth2_createUserLocally($name) {
+    global $user;
+    if ($user->uid) {
+      //Don't Login  because we already are
+      return;
+    }    
+
+    // ++++++++++++++++++++++++++= FROM CAS MODULE START+++++++++++++++++++++++++++++++++++++++++++++++++++++++    
+    $account = user_load_by_name($name);
+    // Automatic user registration.
+    if (!$account /*&& $gsis_user['register']*/) {
+      // No account could be found and auto registration is enabled, so attempt
+      // to register a new user.
+      $account = taxis_user_register($name); 
+      if (!$account) {
+        // The account could not be created, set a message.
+        //drupal_set_message("246 - oauth2_createUserLocally - user could not be created");
+        if ($force_authentication) {
+          drupal_set_message(t('A new account could not be created for %name. The username is already in use on this site.', array('%name' => $name)), 'error');
+        }
+        return;
+      }
+      //local_taxis_user_autologin($name);
+      taxis_loginUserLocally($account);
+      return $account;
+    }
+
+
+    // Save the user account and log the user in.
+    //$user = user_save($account, $edit);
+    //user_login_finalize($edit);
+    // ++++++++++++++++++++++++++= FROM CAS MODULE  END+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // Save the new user.
+    ///$user = user_save(NULL, $user);
+
+    // Report the new user in the log.
+    watchdog('oauth2_gsis', 'New user: %name (%email).', array(
+      '%name' => $name,
+      '%email' => $email ? $email : 'no e-mail address',
+    ), WATCHDOG_NOTICE, l(t('edit'), 'user/' . $user->uid . '/edit'));
+    //echo "<h1>INSIDE oauth2_createUserLocally ok USER $name CREATED</h1>";
+    // Return it.
+    return $user;
+  }
+
+
+/**
+ * Register a CAS user with some default values.
+ *
+ * @param $gsis_user
+ *   The name of the gsis user.
+ * @param $options
+ *   An associative array of options, with the following elements:
+ *    - 'edit': An array of fields and values for the new user. If omitted,
+ *      reasonable defaults are used.
+
+ *
+ * @return
+ *   The user object of the created user, or FALSE if the user cannot be
+ *   created.
+ */
+function taxis_user_register($gsis_user, $options = array()) {
+  $gsis_role_id=user_role_load_by_name("GSIS_USER");
+  //echo "<h1>ROLE GOT= $gsis_role_id->rid</h1>";
+  // Add some reasonable defaults if they have not yet been provided.
+  $edit=array();
+  $edit += array(
+    'name' => $gsis_user,
+    'pass' => user_password(),
+    'init' => $gsis_user,
+    'mail' => $gsis_user."@example.com",// insert a dummy mail
+    'status' => 1,
+    'roles' => array($gsis_role_id->rid => $gsis_role_id->rid) , // give GSIS_USER role to this user
+  );
+
+  // See if the user name is already taken.
+  if ((bool) db_select('users')->fields('users', array('name'))->condition('name', db_like($edit['name']), 'LIKE')->range(0, 1)->execute()->fetchField()) {
+    return FALSE;
+  }
+
+  // Create the user account.
+  $account = user_save(drupal_anonymous_user(), $edit);
+  watchdog("user", 'new user: %n (GsIs)', array('%n' => format_username($account)), WATCHDOG_NOTICE, l(t("edit user"), "user/edit/$account->uid"));
+
+
+  // Reload to ensure that we have a fully populated user object.
+  return user_load($account->uid);
+}
+
+
+
+//+++++++++++++++++++++++++ block for GSIS LOGIN  ++++++++++++++++++++++++++++++++++++++++
+
+/**
+ * Implements hook_block_info().
+ */
+function oauth2_gsis_block_info() {
+  $blocks['login']['info'] = t('oauth2_gsis login (block name)');
+  // Not worth caching.
+  $blocks['login']['cache'] = DRUPAL_NO_CACHE;
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function oauth2_gsis_block_view($delta = '') {
+  global $user;
+
+  $block = array();
+
+  switch ($delta) {
+    case 'login':
+      // For usability's sake, avoid showing two login forms on one page.
+      if (!$user->uid && !(arg(0) == 'user' && !is_numeric(arg(1)))) {
+        $block['subject'] = t('User login');
+        $block['content'] = drupal_get_form('oauth2_gsis_login_block');
+      }
+      return $block;
+  }
+}
+
+/**
+ * Login form for the CAS login block.
+ */
+function oauth2_gsis_login_block($form) {
+
+
+  //echo "<h3>CURRENT PATH =". request_path()."</h3>";
+  //$form['#action'] = url('cas', array('query' => drupal_get_destination()));
+  //$form['#action'] = url('oauth2/authorized', array('query' => drupal_get_destination()));// Call A ROUTE that CALLS taxis
+	$arr01=array("1"=>"oauth2_gsis_login_block");
+	$arr01["my_current_path"]=request_path();
+	$form['#action'] = url('gsis', $arr01);// Call A ROUTE that CALLS taxis
+
+  $form['#id'] = 'oauth2_gsis-login-form';
+  session_start();
+  $_SESSION['GSIS-session-last-webform-url'] = request_path(); // Store path in session to redirect after login
+  $form['oauth2_gsis_login_redirection_message'] = array(
+    '#type' => 'item',
+    //'#markup' => t(variable_get('oauth2_gsis_login_redir_message', "oauth2_gsis_LOGIN_REDIR_MESSAGE")),
+    '#markup' => t(variable_get('oauth2_gsis_login_redir_message', "|----|")),
+    '#weight' => -1,
+  );
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    //'#value' => t(variable_get('oauth2_gsis_login_invite', "oauth2_gsis_LOGIN_INVITE_DEFAULT")),
+    '#value' => t(variable_get('oauth2_gsis_login_invite', "Login Using GSIS")),
+  );
+
+  return $form;
+}
+
+
+
+//##########################  STEP 1 send client_id #############################$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#############
+/**
+ * Determine if we should require the user be authenticated.
+ *
+ * @return
+ *   TRUE if we should require the user be authenticated, FALSE otherwise.
+ */
+function oauth2gsis_login_page() {
+
+  //drupal_set_message("<h1>INSIDE START A1 oauth2gsis_login_page</h1>");
+  //drupal_set_message(json_encode($_REQUEST));
+  require_once('./vendor/autoload.php'); //needed for Guzzle
+  ///session_start();
+
+  $tag = "_gsis_";
+  $appId = "";
+  $secret = "";
+  $redirectUri = "";
+  $tokenUrl = "";
+  $userinfoUrl = "";
+  $authorizeUrl = "";
+
+  $config = NULL;
+  $language = NULL;
+  $httpClient = NULL;
+
+
+    $http = new \GuzzleHttp\Client; //jon - this might not be needed
+
+
+
+
+
+      $tokenUrl     = _oauth2_getUrl('tokenUrl');//'http://localhost:8282/oauth2/v4/token';
+      $userinfoUrl  = _oauth2_getUrl('userinfoUrl');//'http://localhost:8282/oauth2/v3/userinfo';
+      $authorizeUrl = _oauth2_getUrl('authorizeUrl');//'http://localhost:8282/o/oauth2/v2/auth';
+      $redirectUri  = _oauth2_getUrl('redirectUri');//'http://localhost/formspde-test/gsis';
+      //drupal_set_message ("676 URLKs= ".$tokenUrl.$userinfoUrl.$authorizeUrl.$redirectUri );
+
+
+/*
+      'token_endpoint' => 'http://localhost:8282/oauth2/v4/token',// variable_get('oauth2_authentication_token_endpoint', ''),
+      'auth_flow' => 'server-side',
+      'client_id' => 'dummy-client-id',//variable_get('oauth2_authentication_client_id', ''),
+      'client_secret' => 'dummy-client-secret', //variable_get('oauth2_authentication_client_secret', ''),
+      'authorization_endpoint' => 'http://localhost:8282/o/oauth2/v2/auth',
+      //'redirect_uri' => 'http://localhost/formspde-test/oauth2/authorized',
+      'redirect_uri' => 'http://localhost/formspde-test/oauth2callback',
+  */    
+
+
+    // step 2 success get token with code.
+    if (NULL !== $_REQUEST['code']) {
+      //echo "<h1>INSIDE START A1 step2 oauth2gsis_login_page</h1>";
+      $code = $_REQUEST['code'];
+      $state = $_REQUEST['state'];
+
+
+
+      //try {
+        $gettokenurl = $tokenUrl;
+        $data=_oauth2_getConData($code);
+
+        $body = http_build_query($data);
+        $httpClient = new \GuzzleHttp\Client;
+        $tokenjson = $httpClient->post(
+        $gettokenurl, [
+          'body' => $body,
+          'headers' => [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/x-www-form-urlencoded',
+          ],
+        ]
+        )->getBody(TRUE)->getContents();
+
+        //var_dump($tokenjson);
+        ///$tokenarray = Json::decode($tokenjson);
+        $tokenarray = json_decode($tokenjson,true);
+        //var_dump($tokenarray);
+      //}
+        /*
+      catch (RequestException $e) {
+        watchdog_exception('gsislogin', $e, $e->getMessage());
+        return ['#markup' => $this->t("ERR: 003 Problem in connection with the General Secretariat of Information Systems.")];
+      }
+      catch (ClientException $e) {
+        watchdog_exception('gsislogin', $e, $e->getMessage());
+        return ['#markup' => $this->t("ERR: 004 Problem in connection with the General Secretariat of Information Systems.")];
+      }
+      */
+      // step3.
+      try {
+        //echo "<h1>INSIDE START A2  step 3 oauth2gsis_login_page</h1>";
+        // TODO check fields.'&fields=id,name,emails';.
+        //drupal_set_message ("671 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
+        $getuserurl = $userinfoUrl . "?format=xml&access_token=" . $tokenarray['access_token'];
+        //drupal_set_message("USERINFO: getuserurl = this->userinfoUrl =".$getuserurl);
+        $userxml = $httpClient->get(
+        $getuserurl, [
+          'headers' => [
+            'Accept' => 'application/xml',
+            'Content-Type' => 'application/x-www-form-urlencoded;',
+          ],
+        ]
+        )->getBody(TRUE)->getContents();
+        //var_dump($userxml);
+        // In case of error gsis sends JSON !!!
+        //$checkerror = Json::decode($userxml);
+        $checkerror = json_decode($userxml,true);
+
+        if ($checkerror !== NULL) {
+          return ['#markup' => $this->t("ERR:  Data return error")];
+        }
+        //drupal_set_message("XML=".$userxml);
+        $xml = simplexml_load_string($userxml);
+        
+        //drupal_set_message('AAAAAAAAAAA Now decoding '.($userxml));
+        //$userid = $xml->userid;
+        //drupal_set_message("userid====".$userid);
+        //$taxid = $xml->taxid;
+        $userid = $xml->userinfo['userid'][0]->__toString();
+        $taxid = $xml->userinfo['taxid'][0]->__toString();
+        
+        $lastname = $xml->userinfo['lastname'][0]->__toString();
+        $firstname = $xml->userinfo['firstname'][0]->__toString();
+        $fathername = $xml->userinfo['fathername'][0]->__toString();
+        $mothername = $xml->userinfo['mothername'][0]->__toString();
+        $birthyear = $xml->userinfo['birthyear'][0]->__toString();
+        //drupal_set_message ("767 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
+
+        // Set session variables so we can use them from oauth2_taxis_tokens module
+        if($taxid!=NULL && !isset($_SESSION['GSIS-session-afm']))
+        { // NOTE : userinfo is NOT saved in database. It is just stored in session
+          $_SESSION['GSIS-session-afm'] = $taxid;
+          $_SESSION['GSIS-session-username'] = $userid;
+          $_SESSION['GSIS-session-lastname'] = $lastname;
+          $_SESSION['GSIS-session-firstname'] = $firstname;
+          $_SESSION['GSIS-session-fathername'] = $fathername;
+          $_SESSION['GSIS-session-mothername'] = $mothername;
+          $_SESSION['GSIS-session-birthyear'] = $birthyear;
+        }
+
+
+        //echo "<h1>INSIDE START A2  step 3b oauth2gsis_login_page</h1>";
+
+        $userDetails = [
+          "userid" => $userid,
+          "taxid" => $taxid,
+          "lastname" => $lastname,
+          "firstname" => $firstname,
+          "fathername" => $fathername,
+          "mothername" => $mothername,
+          "birthyear" => $birthyear,
+        ];
+
+        //print_r($userDetails);
+
+        //var_dump($userDetails);
+        //oauth2_gsis_authenticate($userid,$tokenarray['access_token']);  // Need to replace Class file
+        oauth2_gsis_authenticate(_oauth2_transform_username($userid),$tokenarray['access_token']);  // transform username before doing anything
+        
+        return array('#markup'=>arg(0).arg(1).'GSIS CALLBACK Now we should create a USER and then Logout from GSIS');
+        ////$this->createUser($userDetails);
+        
+        ///return $this->redirect('<front>');
+
+      }
+      catch (RequestException $e) {
+        watchdog_exception('gsislogin', $e, $e->getMessage());
+        return ['#markup' => $this->t("ERR: 006 Problem of entering data from the General Secretariat of Information Systems.")];
+      }
+      catch (ClientException $e) {
+        watchdog_exception('gsislogin', $e, $e->getMessage());
+        return ['#markup' => $this->t("ERR: 007 Data entry problem by the General Secretariat of Information Systems.")];
+      }
+
+    } //END of Step2 if (NULL !== $_REQUEST['code'])
+
+
+
+    // Step 1.
+    //echo "<h1>INSIDE START A3  step 1 oauth2gsis_login_page</h1>";
+    $_SESSION['gsis_state'] = "_gsis_";
+//    $_SESSION['GSIS-session-last-webform-url'] = request_path();
+    
+
+        $getauthurl=$authorizeUrl . '?client_id='._oauth2_getConData('')['client_id']. '&redirect_uri=' . _oauth2_getUrl('redirectUri')  . '&response_type=code&scope=read&state=' . "_gsis_";
+        //drupal_set_message ("819 REDIRECTING  $getauthurl to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']  . _oauth2_getUrl('redirectUri') );
+        drupal_goto($getauthurl); //redirect to Oauth2 server
+        /*
+        $userxml = $http->get(
+        $getauthurl, [
+          'headers' => [
+            'Accept' => 'application/xml',
+            'Content-Type' => 'application/x-www-form-urlencoded;',
+          ],
+        ]
+        )->getBody(TRUE)->getContents();
+*/
+    //return new TrustedRedirectResponse($authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
+    //return array('#markup'=>arg(0).arg(1).$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_");
+
+
+return array('#markup'=>arg(0).arg(1).$getauthurl);
+}
+
+
+
+
