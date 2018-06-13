@@ -31,11 +31,11 @@ function _oauth2_getUrl($url_name)
     $wanted_url="";
 
     /*
-    //GSIS test server
-    if($url_name=='tokenUrl')       return 'https://test.gsis.gr/oauth2server/oauth/token';
-    if($url_name=='userinfoUrl')     return 'https://test.gsis.gr/oauth2server/userinfo';
-    if($url_name=='authorizeUrl')    return 'https://test.gsis.gr/oauth2server/oauth/authorize';
-    if($url_name=='logoutRemoteUrl')    return 'https://test.gsis.gr/oauth2server/logout/';
+    //GSIS OFFICIAL PRODUCTION server
+    if($url_name=='tokenUrl')       return 'https://www1.gsis.gr/oauth2server/oauth/token';
+    if($url_name=='userinfoUrl')     return 'https://www1.gsis.gr/oauth2server/userinfo';
+    if($url_name=='authorizeUrl')    return 'https://www1.gsis.gr/oauth2server/oauth/authorize';
+    if($url_name=='logoutRemoteUrl')    return 'https://www1.gsis.gr/oauth2server/logout/';
 
     if($url_name=='redirectUri')     return 'http://forms2.minedu.gov.gr/formspde/gsis';
     if($url_name=='redirectLogoutCallbackUri')      return 'http://forms2.minedu.gov.gr/formspde/gsis_logout_callback';
