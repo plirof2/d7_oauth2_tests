@@ -17,3 +17,14 @@ Before connectiong to the official/pilot GSIS servers you can try connecting to 
 It emulates GSIS server and you can have it return whatever data you prefer
 
 
+## Security proposals
+- use limit_visit for /gsis and /gsis-callback_logout
+- add to .htaccess this 
+```html
+<files "gsis" >
+    Order Deny,Allow
+    Deny from all
+ #   add IPs seperated by space    
+    Allow from 127.0.1.1 127.0.0.1
+</files>
+```
