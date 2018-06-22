@@ -1,0 +1,89 @@
+# $Id$
+#
+# Greek translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  oauth2_taxis_tokens.module: n/a
+#  oauth2_taxis_tokens.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2018-06-20 13:46+0300\n"
+"PO-Revision-Date: 2018-06-20 13:46+0300\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Greek <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: oauth2_taxis_tokens.module:21
+msgid "GSIS-taxis-afm user"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:22
+msgid "current-user Returns the afm item)"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:26
+msgid "GSIS-taxis-username"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:27
+msgid "current-user Returns the Username item)"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:31
+msgid "GSIS-taxis-firstname"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:32
+msgid "current-user Returns the first name item)"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:36
+msgid "GSIS-taxis-lastname"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:37
+msgid "current-user Returns the lastname item)"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:41
+msgid "GSIS-taxis-fathername"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:42
+msgid "current-user Returns the fathername item)"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:46
+msgid "GSIS-taxis-mothername"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:47
+msgid "current-user Returns the mothername item)"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:51
+msgid "GSIS-taxis-birthyear"
+msgstr ""
+
+#: oauth2_taxis_tokens.module:52
+msgid "current-user Returns the birthyaer item)"
+msgstr ""
+
+#: oauth2_taxis_tokens.info:0
+msgid "oauth2_taxis_tokens"
+msgstr ""
+
+#: oauth2_taxis_tokens.info:0
+msgid "Provides oauth2_taxis_tokens functionality."
+msgstr ""
+
+#: oauth2_taxis_tokens.info:0
+msgid "OAuth2"
+msgstr ""
+
