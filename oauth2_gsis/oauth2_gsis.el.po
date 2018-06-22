@@ -92,3 +92,6 @@ msgstr ""
 msgid "gsis"
 msgstr "ΓΓΠΣ"
 
+#: oauth2_gsis.info:0
+msgid "Login Using GSIS"
+msgstr "Είσοδος μέ κωδικούς ΓΓΠΣ"
