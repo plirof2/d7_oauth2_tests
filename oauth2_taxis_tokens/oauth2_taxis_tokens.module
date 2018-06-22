@@ -68,49 +68,49 @@ function oauth2_taxis_tokens_tokens($type, $tokens, array $data = array(), array
         foreach ($tokens as $name => $original) {
             switch ($name) {
             case 'GSIS-taxis-afm':
-              $name=$_SESSION['GSIS-session-afm'];
+              $name=@$_SESSION['GSIS-session-afm'];
               if ($name==null) {
                   $name = 'GSIS-taxis value NOT set-afm';
               }
               $replacements[$original] = $name ;//"aaaaa ORIGINAL gsis AFM ,orig=".$original;
               break;
             case 'GSIS-taxis-username':
-              $name=$_SESSION['GSIS-session-username'];
+              $name=@$_SESSION['GSIS-session-username'];
               if ($name==null) {
                   $name = 'GSIS-taxis value NOT set-username';
               }
               $replacements[$original] = $name;
               break;
             case 'GSIS-taxis-firstname':
-              $name=$_SESSION['GSIS-session-firstname'];
+              $name=@$_SESSION['GSIS-session-firstname'];
               if ($name==null) {
                   $name = 'GSIS-taxis value NOT set-firstname';
               }
               $replacements[$original] = $name;
               break;
             case 'GSIS-taxis-lastname':
-              $name=$_SESSION['GSIS-session-lastname'];
+              $name=@$_SESSION['GSIS-session-lastname'];
               if ($name==null) {
                   $name = 'GSIS-taxis value NOT set-lastname';
               }
               $replacements[$original] = $name;
               break;
             case 'GSIS-taxis-fathername':
-              $name=$_SESSION['GSIS-session-fathername'];
+              $name=@$_SESSION['GSIS-session-fathername'];
               if ($name==null) {
                   $name = 'GSIS-taxis value NOT set-fathername';
               }
               $replacements[$original] = $name;
               break;
             case 'GSIS-taxis-mothername':
-              $name=$_SESSION['GSIS-session-mothername'];
+              $name=@$_SESSION['GSIS-session-mothername'];
               if ($name==null) {
                   $name = 'GSIS-taxis value NOT set-mothername';
               }
               $replacements[$original] = $name;
               break;
             case 'GSIS-taxis-birthyear':
-              $name=$_SESSION['GSIS-session-birthyear'];
+              $name=@$_SESSION['GSIS-session-birthyear'];
               if ($name==null) {
                   $name = 'GSIS-taxis value NOT set-birthyear';
               }
