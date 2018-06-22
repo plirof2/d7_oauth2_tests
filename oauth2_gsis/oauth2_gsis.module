@@ -401,7 +401,7 @@ function oauth2_gsis_login_block($form)
     $form['oauth2_gsis_login_redirection_message'] = array(
       '#type' => 'item',
       //'#markup' => t(variable_get('oauth2_gsis_login_redir_message', "oauth2_gsis_LOGIN_REDIR_MESSAGE")),
-      '#markup' => t(variable_get('oauth2_gsis_login_redir_message', ".")),
+      '#markup' => t(variable_get('oauth2_gsis_login_redir_message', "")),
       '#weight' => -1,
     );
     $form['actions'] = array('#type' => 'actions');
