@@ -1,11 +1,11 @@
 name = oauth2_taxis_tokens
 description = Provides oauth2_taxis_tokens functionality.
-package = "OAuth2"
+package = "gsis"
 core = 7.x
 
 
 ; Information added by Drupal.org packaging script on 2017-06-24
-version = "7.x-0.1+1-dev"
+version = "7.x-1.0+3-180610-devjon"
 core = "7.x"
 project = "oauth2_taxis_tokens"
 datestamp = "1498314845"
