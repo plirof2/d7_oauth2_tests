@@ -4,7 +4,7 @@
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
 #  oauth2_gsis.module: n/a
-#  oauth2_gsis__180610a_not_beautify.module: n/a
+#  oauth2_gsis.module: n/a
 #  oauth2_gsis.info: n/a
 #
 #, fuzzy
@@ -20,69 +20,69 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
-#: oauth2_gsis.module:145 oauth2_gsis__180610a_not_beautify.module:114
+#: oauth2_gsis.module:145 oauth2_gsis.module:114
 msgid "Administer authentication parameters"
 msgstr ""
 
-#: oauth2_gsis.module:146 oauth2_gsis__180610a_not_beautify.module:115
+#: oauth2_gsis.module:146 oauth2_gsis.module:115
 msgid "Allows users to set authentication parameters such as the token endpoint and client credentials."
 msgstr ""
 
-#: oauth2_gsis.module:275 oauth2_gsis__180610a_not_beautify.module:248
+#: oauth2_gsis.module:275 oauth2_gsis.module:248
 msgid "A new account could not be created for %name. The username is already in use on this site."
-msgstr ""
+msgstr "Δεν ήταν δυνατόν να δημιουργηθεί νέος λογαριασμός για τον %name"
 
-#: oauth2_gsis.module:297 oauth2_gsis__180610a_not_beautify.module:270
+#: oauth2_gsis.module:297 oauth2_gsis.module:270
 msgid "edit"
 msgstr "επεξεργασία"
 
-#: oauth2_gsis.module:341 oauth2_gsis__180610a_not_beautify.module:313
+#: oauth2_gsis.module:341 oauth2_gsis.module:313
 msgid "edit user"
-msgstr ""
+msgstr "επεξεργασία χρήστη"
 
-#: oauth2_gsis.module:357 oauth2_gsis__180610a_not_beautify.module:328
+#: oauth2_gsis.module:357 oauth2_gsis.module:328
 msgid "oauth2_gsis login (block name)"
-msgstr ""
+msgstr "Σύνδεση με GSIS (block)"
 
-#: oauth2_gsis.module:377 oauth2_gsis__180610a_not_beautify.module:347
+#: oauth2_gsis.module:377 oauth2_gsis.module:347
 msgid "User login"
 msgstr "Είσοδος"
 
-#: oauth2_gsis.module:525 oauth2_gsis__180610a_not_beautify.module:499
+#: oauth2_gsis.module:525 oauth2_gsis.module:499
 msgid "ERR:  Data return error"
-msgstr ""
+msgstr "Πρόβλημα επιστροφής δεδομένων"
 
-#: oauth2_gsis.module:580 oauth2_gsis__180610a_not_beautify.module:557
+#: oauth2_gsis.module:580 oauth2_gsis.module:557
 msgid "ERR: 006 Problem of entering data from the General Secretariat of Information Systems."
-msgstr ""
+msgstr "Υπήρξε πρόβλημα στην επικοινωνία με την ΓΓΠΣ"
 
-#: oauth2_gsis.module:583 oauth2_gsis__180610a_not_beautify.module:561
+#: oauth2_gsis.module:583 oauth2_gsis.module:561
 msgid "ERR: 007 Data entry problem by the General Secretariat of Information Systems."
-msgstr ""
+msgstr "Υπήρξε πρόβλημα στην επικοινωνία με την ΓΓΠΣ"
 
-#: oauth2_gsis.module:294 oauth2_gsis__180610a_not_beautify.module:267 oauth2_gsis.info:0
+#: oauth2_gsis.module:294 oauth2_gsis.module:267 oauth2_gsis.info:0
 msgid "oauth2_gsis"
 msgstr ""
 
-#: oauth2_gsis.module:294 oauth2_gsis__180610a_not_beautify.module:267
+#: oauth2_gsis.module:294 oauth2_gsis.module:267
 msgid "New user: %name (%email)."
 msgstr "Νέος χρήστης: %name (%email)."
 
-#: oauth2_gsis.module:341 oauth2_gsis__180610a_not_beautify.module:313
+#: oauth2_gsis.module:341 oauth2_gsis.module:313
 msgid "user"
 msgstr "χρήστης"
 
-#: oauth2_gsis.module:341 oauth2_gsis__180610a_not_beautify.module:313
+#: oauth2_gsis.module:341 oauth2_gsis.module:313
 msgid "new user: %n (GsIs)"
 msgstr ""
 
 #: oauth2_gsis.module:121
 msgid "GSIS Login"
-msgstr ""
+msgstr "Είσοδος ΓΓΠΣ"
 
 #: oauth2_gsis.module:129
 msgid "GSIS logout"
-msgstr ""
+msgstr "Έξοδος από ΓΓΠΣ"
 
 #: oauth2_gsis.info:0
 msgid "oauth2_gsis  Authenticates Drupal users via OAuth2 . Note: GSIS-LOGIN Block is auto-enabled for bartik theme. For others you must enable it manually"
@@ -90,5 +90,5 @@ msgstr ""
 
 #: oauth2_gsis.info:0
 msgid "gsis"
-msgstr ""
+msgstr "ΓΓΠΣ"
 

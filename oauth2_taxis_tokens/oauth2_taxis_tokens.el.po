@@ -25,7 +25,7 @@ msgstr ""
 
 #: oauth2_taxis_tokens.module:22
 msgid "current-user Returns the afm item)"
-msgstr ""
+msgstr "Επιστρέφει το ΑΦΜ"
 
 #: oauth2_taxis_tokens.module:26
 msgid "GSIS-taxis-username"
@@ -33,7 +33,7 @@ msgstr ""
 
 #: oauth2_taxis_tokens.module:27
 msgid "current-user Returns the Username item)"
-msgstr ""
+msgstr "Επιστρέφει το όνομα χρήστη(username)"
 
 #: oauth2_taxis_tokens.module:31
 msgid "GSIS-taxis-firstname"
@@ -41,7 +41,7 @@ msgstr ""
 
 #: oauth2_taxis_tokens.module:32
 msgid "current-user Returns the first name item)"
-msgstr ""
+msgstr "Επιστρέφει το (μικρό) όνομα"
 
 #: oauth2_taxis_tokens.module:36
 msgid "GSIS-taxis-lastname"
@@ -49,7 +49,7 @@ msgstr ""
 
 #: oauth2_taxis_tokens.module:37
 msgid "current-user Returns the lastname item)"
-msgstr ""
+msgstr "Επιστρέφει το επίθετο"
 
 #: oauth2_taxis_tokens.module:41
 msgid "GSIS-taxis-fathername"
@@ -57,7 +57,7 @@ msgstr ""
 
 #: oauth2_taxis_tokens.module:42
 msgid "current-user Returns the fathername item)"
-msgstr ""
+msgstr "Επιστρέφει το πατρώνυμο"
 
 #: oauth2_taxis_tokens.module:46
 msgid "GSIS-taxis-mothername"
@@ -65,7 +65,7 @@ msgstr ""
 
 #: oauth2_taxis_tokens.module:47
 msgid "current-user Returns the mothername item)"
-msgstr ""
+msgstr "Επιστρέφει το όνομα μητέρας"
 
 #: oauth2_taxis_tokens.module:51
 msgid "GSIS-taxis-birthyear"
@@ -73,7 +73,7 @@ msgstr ""
 
 #: oauth2_taxis_tokens.module:52
 msgid "current-user Returns the birthyaer item)"
-msgstr ""
+msgstr "Επιστρέφει το έτος γέννησης"
 
 #: oauth2_taxis_tokens.info:0
 msgid "oauth2_taxis_tokens"
