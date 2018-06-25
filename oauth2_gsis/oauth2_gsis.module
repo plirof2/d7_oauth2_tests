@@ -160,16 +160,16 @@ function oauth2_init_getlogouturl()
 
 
 /**
- * Implements hook_user_logout().
+ * Implements HOOK_user_logout().
  * We do a REMOTE GSIS logout when user press logout . 
  * NOTE!!! : This is used because PRODUCTION SERVER DOES NOT support logout redirect yet (while test server does). This will not be used when the GSIS production server is UPDATED
  */
 function oauth2_gsis_user_logout($account) {
 	//drupal_set_message(t("oauth2_gsis_logout_user_logout CALLED"));
-	//watchdog('oauth2_gsis_logout_user_logout', 'CALLED visited HOOK.', array('%name' => "TESTaaa",), WATCHDOG_NOTICE, l('oauth2_gsisTEST', 'user/11111111111111111111/edit'));
+	//watchdog('oauth2_gsis_logout_user_logout', 'CALLED visited HOOK.', array('%name' => "TESTaaa",), WATCHDOG_NOTICE, l('oauth2_gsisTEST', 'DEBUG!!!'));
 	global $user;
-	if (in_array('GSIS_USER', $user->roles)) {   
-		//watchdog('oauth2_gsis_logout_user_logout', 'CALLED visited HOOK & user role=GSIS_USER.', array('%name' => "TESTaaa",), WATCHDOG_NOTICE, l('oauth2_gsisTEST', 'user/11111111111111111111/edit'));
+	if (!_oauth2_getUrl("automatic_gsis_logout") && in_array('GSIS_USER', $user->roles)) {   
+		//watchdog('oauth2_gsis_logout_user_logout', 'CALLED visited HOOK & user role=GSIS_USER.', array('%name' => "TESTaaa",), WATCHDOG_NOTICE, l('oauth2_gsisTEST', 'DEBUG!!!'));
 	    $getlogouturl=oauth2_init_getlogouturl();
 	    session_destroy();
 	    drupal_goto($getlogouturl); //redirect to Oauth2 server
@@ -516,20 +516,18 @@ function oauth2gsis_login_page()
       
         // step3.
         try {
-            //echo "<h1>INSIDE START A2  step 3 oauth2gsis_login_page</h1>";
             // TODO check fields.'&fields=id,name,emails';.
-            //drupal_set_message ("671 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
             $getuserurl = $userinfoUrl . "?format=xml&access_token=" . $tokenarray['access_token'];
             //drupal_set_message("USERINFO: getuserurl = this->userinfoUrl =".$getuserurl);
             $userxml = $httpClient->get(
-        $getuserurl,
+        	$getuserurl,
             [
-          'headers' => [
+          	'headers' => [
             'Accept' => 'application/xml',
             'Content-Type' => 'application/x-www-form-urlencoded;',
-          ],
-        ]
-        )->getBody(true)->getContents();
+          	],
+        	]
+        	)->getBody(true)->getContents();
             //var_dump($userxml);
             // In case of error gsis sends JSON !!!
             //$checkerror = Json::decode($userxml);
@@ -540,8 +538,6 @@ function oauth2gsis_login_page()
             }
             //drupal_set_message("XML=".$userxml);
             $xml = simplexml_load_string($userxml);
-
-            //drupal_set_message('AAAAAAAAAAA Now decoding '.($userxml));
             //$userid = $xml->userid;
             //drupal_set_message("userid====".$userid);
             //$taxid = $xml->taxid;
@@ -556,42 +552,38 @@ function oauth2gsis_login_page()
             //drupal_set_message ("767 REDIRECTING to ORIGINAL path =".$_SESSION['GSIS-session-last-webform-url']);
 
             // Set session variables so we can use them from oauth2_taxis_tokens module
-        if ($taxid!=null && !isset($_SESSION['GSIS-session-afm'])) { // NOTE : userinfo is NOT saved in database. It is just stored in session
-          $_SESSION['GSIS-session-afm'] = $taxid;
-            $_SESSION['GSIS-session-username'] = $userid;
-            $_SESSION['GSIS-session-lastname'] = $lastname;
-            $_SESSION['GSIS-session-firstname'] = $firstname;
-            $_SESSION['GSIS-session-fathername'] = $fathername;
-            $_SESSION['GSIS-session-mothername'] = $mothername;
-            $_SESSION['GSIS-session-birthyear'] = $birthyear;
-        }
+	        if ($taxid!=null && !isset($_SESSION['GSIS-session-afm'])) { // NOTE : userinfo is NOT saved in database. It is just stored in session
+	          $_SESSION['GSIS-session-afm'] = $taxid;
+	            $_SESSION['GSIS-session-username'] = $userid;
+	            $_SESSION['GSIS-session-lastname'] = $lastname;
+	            $_SESSION['GSIS-session-firstname'] = $firstname;
+	            $_SESSION['GSIS-session-fathername'] = $fathername;
+	            $_SESSION['GSIS-session-mothername'] = $mothername;
+	            $_SESSION['GSIS-session-birthyear'] = $birthyear;
+	        }
 
 
             //echo "<h1>INSIDE START A2  step 3b oauth2gsis_login_page</h1>";
 
             $userDetails = [
-          "userid" => $userid,
-          "taxid" => $taxid,
-          "lastname" => $lastname,
-          "firstname" => $firstname,
-          "fathername" => $fathername,
-          "mothername" => $mothername,
-          "birthyear" => $birthyear,
-        ];
+	          "userid" => $userid,
+	          "taxid" => $taxid,
+	          "lastname" => $lastname,
+	          "firstname" => $firstname,
+	          "fathername" => $fathername,
+	          "mothername" => $mothername,
+	          "birthyear" => $birthyear,
+        	];
 
-            //print_r($userDetails);
+	        //var_dump($userDetails);
+	        oauth2_gsis_authenticate(_oauth2_transform_username($userid), $tokenarray['access_token']);  // transform username before doing anything
 
-            //var_dump($userDetails);
-        //oauth2_gsis_authenticate($userid,$tokenarray['access_token']);  // Need to replace Class file
-        oauth2_gsis_authenticate(_oauth2_transform_username($userid), $tokenarray['access_token']);  // transform username before doing anything
+	        if (isset($_SESSION['GSIS-session-last-webform-url'])) {
+	        	drupal_goto($_SESSION['GSIS-session-last-webform-url']);
+	    	} else return array('#markup'=>arg(0).arg(1).t('GSIS CALLBACK unspecified initial url'));
+	            ////$this->createUser($userDetails);
 
-        //return array('#markup'=>arg(0).arg(1).'GSIS CALLBACK Now we should create a USER and then Logout from GSIS');
-        if (isset($_SESSION['GSIS-session-last-webform-url'])) {
-        	drupal_goto($_SESSION['GSIS-session-last-webform-url']);
-    	} else return array('#markup'=>arg(0).arg(1).t('GSIS CALLBACK unspecified initial url'));
-            ////$this->createUser($userDetails);
-
-        ///return $this->redirect('<front>');
+	        ///return $this->redirect('<front>');
         } catch (RequestException $e) {
             watchdog_exception('gsislogin', $e, $e->getMessage());
             return ['#markup' => $this->t("ERR: RXXML001 Error with returned data")];
