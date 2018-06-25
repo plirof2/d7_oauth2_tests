@@ -4,12 +4,6 @@ use GuzzleHttp\Client;
 /**
  * @file
  * Provides functionality for the OAuth2 Authentication module.
- * http://localhost:8282/o/oauth2/v2/auth            ?client_id=dummy-client-id&redirect_uri=http%3A%2F%2Flocalhost%2Fformspde-test%2Foauth2callback &response_type=code&state=483caffb45b611f58fc9ee6e03743b4a
- * https://test.gsis.gr/oauth2server/oauth/authorize ?client_id=AAAAAAAA       &redirect_uri=http://forms2.minedu.gov.gr/gsis                        &response_type=code&state=_gsis_6857058725b0fadf00e4d1&scope=read
-
- * REmote logout  https://test.gsis.gr/oauth2server /logout/{clientId_δικό μας}/?url=https://eduslim1.minedu.gov.gr/laravel/logout.htm
-
-* http://forms2.minedu.gov.gr/formspde/gsis?code=t8229A&state=_gsis_6857058725b0fadf00e4d1
 */
 
 /**
@@ -29,6 +23,11 @@ function _oauth2_transform_username($username)
 function _oauth2_getUrl($url_name)
 {
     $wanted_url="";
+    $automatic_gsis_logout=false; // This is a quickfix because production server does NOT support logout redirect ?url= parameter
+    if ($url_name=='automatic_gsis_logout') {
+        return $automatic_gsis_logout;
+    }
+
 
     /*
     //GSIS OFFICIAL PRODUCTION server
@@ -132,6 +131,14 @@ function oauth2_gsis_menu()
     'type' => MENU_SUGGESTED_ITEM,
   );
 
+    $items['oauth2gsislogout'] = array(
+    'path' => 'gsis_logout_manual', //this will logout user when he press button
+    'title' => 'GSIS logout manual',
+    'page callback' => 'oauth2_gsis_manual_remote_logout',
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_SUGGESTED_ITEM,
+  );
+
     return $items;
 }
 
@@ -177,7 +184,22 @@ function oauth2_init_remote_logout()
     //drupal_set_message(_oauth2_getUrl('redirectLogoutCallbackUri') .$encoded_url);
     $getlogouturl=_oauth2_getUrl('logoutRemoteUrl')._oauth2_getConData('')['client_id'].'/?url='.$encoded_url;
     //$getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
-  drupal_goto($getlogouturl); //redirect to Oauth2 server
+  	drupal_goto($getlogouturl); //redirect to Oauth2 server
+}
+
+
+function oauth2_gsis_manual_remote_logout()
+{  // got here from  pressing GSIS logout button
+    //drupal_set_message ("140 gsis_logout_callback oauth2_gsis_remote_logout RETURN path =".$_REQUEST['return_path']);
+    //if (isset($_SESSION['GSIS-session-last-webform-url'])) drupal_goto($_SESSION['GSIS-session-last-webform-url']);
+    $encoded_url=urlencode(_oauth2_getUrl('redirectLogoutCallbackUri').'?return_path='.$_SESSION['GSIS-session-last-webform-url']);
+    //drupal_set_message(_oauth2_getUrl('redirectLogoutCallbackUri') .$encoded_url);
+    $getlogouturl=_oauth2_getUrl('logoutRemoteUrl')._oauth2_getConData('')['client_id'].'/?url='.$encoded_url;
+    //$getauthurl=$authorizeUrl . '?client_id=dummy-client-id' . '&redirect_uri=' . $redirectUri  . '&response_type=code&scope=read&state=' . "_gsis_";
+  	drupal_goto($getlogouturl); //redirect to Oauth2 server
+  	user_logout();
+
+
 }
 
 /****************************************************************************
