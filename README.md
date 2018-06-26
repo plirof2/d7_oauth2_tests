@@ -1,3 +1,5 @@
+# OLD Test repo Newest is here : https://github.com/plirof2/d7_oauth2_gsis
+
 # d7_oauth2_gsis module
 Module for Drupal 7 that allows connecting to an Oauth2 server. This is made for the Greek GSIS server but it could be used for other servers with modifications.
 
